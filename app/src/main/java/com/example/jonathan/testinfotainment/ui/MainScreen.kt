@@ -25,6 +25,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.jonathan.testinfotainment.hvac.data.HvacDataSource
+import com.example.jonathan.testinfotainment.hvac.data.HvacRepositoryImpl
+import com.example.jonathan.testinfotainment.hvac.domain.HvacUseCase
+import com.example.jonathan.testinfotainment.hvac.presentation.HvacScreen
+import com.example.jonathan.testinfotainment.hvac.presentation.HvacViewModel
 
 private const val TAG = "TIF: MainScreen"
 
@@ -38,6 +46,20 @@ enum class Screen(val label: String, val icon: ImageVector) {
 fun MainScreen() {
     Log.i(TAG, "MainScreen")
 
+    // Setup HVAC dependencies manually for this example
+    // In a real app, these would be provided by a DI container like Hilt.
+    val hvacViewModel: HvacViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val dataSource = HvacDataSource()
+                val repository = HvacRepositoryImpl(dataSource)
+                val useCase = HvacUseCase(repository)
+                @Suppress("UNCHECKED_CAST")
+                return HvacViewModel(useCase) as T
+            }
+        }
+    )
+
     var currentScreen by remember { mutableStateOf(Screen.Home) }
 
     Row(modifier = Modifier.fillMaxSize()) {
@@ -48,11 +70,10 @@ fun MainScreen() {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // [2] Initially, there are 3 buttons: "Home", "HVAC", "Settings".
             Screen.entries.forEach { screen ->
                 NavigationRailItem(
-                    selected = currentScreen == screen, // [3] Highlighted
-                    onClick = { currentScreen = screen }, // [3] Clicking each button will display the corresponding screen.
+                    selected = currentScreen == screen,
+                    onClick = { currentScreen = screen },
                     icon = { Icon(imageVector = screen.icon, contentDescription = screen.label) },
                     label = { Text(screen.label) },
                     alwaysShowLabel = true,
@@ -68,14 +89,17 @@ fun MainScreen() {
                 .weight(1f),
             contentAlignment = Alignment.Center
         ) {
-            ScreenContent(screen = currentScreen)
+            ScreenContent(screen = currentScreen, hvacViewModel = hvacViewModel)
         }
     }
 }
 
 @Composable
-fun ScreenContent(screen: Screen) {
-    Text(text = "${screen.label} Screen")
+fun ScreenContent(screen: Screen, hvacViewModel: HvacViewModel) {
+    when (screen) {
+        Screen.HVAC -> HvacScreen(viewModel = hvacViewModel)
+        else -> Text(text = "${screen.label} Screen")
+    }
 }
 
 @Preview(showBackground = true, widthDp = 800, heightDp = 480)
