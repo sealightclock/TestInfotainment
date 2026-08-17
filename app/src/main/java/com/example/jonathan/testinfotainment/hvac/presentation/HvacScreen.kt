@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -41,29 +42,23 @@ fun HvacScreen(viewModel: HvacViewModel) {
             label = if (state.isPowerOn) "ON" else "OFF"
         )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Temperature Control
-            HvacValueControl(
-                icon = Icons.Default.DeviceThermostat,
-                value = "${state.temperature}°F",
-                enabled = state.isPowerOn,
-                onIncrease = { viewModel.onIntent(HvacIntent.IncreaseTemperature) },
-                onDecrease = { viewModel.onIntent(HvacIntent.DecreaseTemperature) }
-            )
+        // Temperature Control
+        HvacValueControl(
+            icon = Icons.Default.DeviceThermostat,
+            value = "${state.temperature}°F",
+            enabled = state.isPowerOn,
+            onIncrease = { viewModel.onIntent(HvacIntent.IncreaseTemperature) },
+            onDecrease = { viewModel.onIntent(HvacIntent.DecreaseTemperature) }
+        )
 
-            // Fan Speed Control
-            HvacValueControl(
-                icon = Icons.Default.Air,
-                value = state.fanSpeed.toString(),
-                enabled = state.isPowerOn,
-                onIncrease = { viewModel.onIntent(HvacIntent.IncreaseFanSpeed) },
-                onDecrease = { viewModel.onIntent(HvacIntent.DecreaseFanSpeed) }
-            )
-        }
+        // Fan Speed Control
+        HvacValueControl(
+            icon = Icons.Default.Air,
+            value = state.fanSpeed.toString(),
+            enabled = state.isPowerOn,
+            onIncrease = { viewModel.onIntent(HvacIntent.IncreaseFanSpeed) },
+            onDecrease = { viewModel.onIntent(HvacIntent.DecreaseFanSpeed) }
+        )
 
         // Front Defroster
         HvacControlButton(
