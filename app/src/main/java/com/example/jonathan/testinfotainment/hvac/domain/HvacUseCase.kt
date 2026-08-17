@@ -18,12 +18,12 @@ class HvacUseCase(private val repository: HvacRepository) {
 
     suspend fun adjustFanSpeed(currentState: HvacEntity, delta: Int) {
         if (!currentState.isPowerOn) return
-        val newFanSpeed = (currentState.fanSpeed + delta).coerceIn(0, 7)
-        if (newFanSpeed == 0) {
-            repository.updateHvacState(currentState.copy(fanSpeed = 0, isPowerOn = false))
-        } else {
-            repository.updateHvacState(currentState.copy(fanSpeed = newFanSpeed))
+        if (currentState.fanSpeed == 1 && delta < 0) {
+            repository.updateHvacState(currentState.copy(isPowerOn = false))
+            return
         }
+        val newFanSpeed = (currentState.fanSpeed + delta).coerceIn(1, 7)
+        repository.updateHvacState(currentState.copy(fanSpeed = newFanSpeed))
     }
 
     suspend fun toggleFrontDefroster(currentState: HvacEntity) {
