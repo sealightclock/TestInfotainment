@@ -45,7 +45,11 @@ fun HvacScreen(viewModel: HvacViewModel) {
         // Temperature Control
         HvacValueControl(
             icon = Icons.Default.DeviceThermostat,
-            value = "${state.temperature}°F",
+            value = when (state.temperature) {
+                63 -> "LO"
+                91 -> "HI"
+                else -> "${state.temperature}°F"
+            },
             enabled = state.isPowerOn,
             onIncrease = { viewModel.onIntent(HvacIntent.IncreaseTemperature) },
             onDecrease = { viewModel.onIntent(HvacIntent.DecreaseTemperature) }
