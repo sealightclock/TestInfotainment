@@ -48,10 +48,11 @@ fun MainScreen() {
 
     // Setup HVAC dependencies manually for this example
     // In a real app, these would be provided by a DI container like Hilt.
+    val context = androidx.compose.ui.platform.LocalContext.current
     val hvacViewModel: HvacViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val dataSource = HvacDataSource()
+                val dataSource = HvacDataSource(context.applicationContext)
                 val repository = HvacRepositoryImpl(dataSource)
                 val useCase = HvacUseCase(repository)
                 @Suppress("UNCHECKED_CAST")
