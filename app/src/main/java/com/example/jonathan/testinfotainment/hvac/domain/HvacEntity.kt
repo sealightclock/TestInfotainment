@@ -6,8 +6,5 @@ data class HvacEntity(
     val isPowerOn: Boolean = true,
     val temperature: Int = Constants.TEMPERATURE_DEFAULT,
     val fanSpeed: Int = Constants.FAN_SPEED_MIN,
-    val isFrontDefrosterOn: Boolean = false,
-
-    val savedTemperature: Int = Constants.TEMPERATURE_DEFAULT,
-    val savedFanSpeed: Int = Constants.FAN_SPEED_MIN
+    val isFrontDefrosterOn: Boolean = false
 )

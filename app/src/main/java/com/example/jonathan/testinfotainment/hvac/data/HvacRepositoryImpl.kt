@@ -10,4 +10,12 @@ class HvacRepositoryImpl(private val dataSource: HvacDataSource) : HvacRepositor
     override suspend fun updateHvacState(hvacEntity: HvacEntity) {
         dataSource.updateState(hvacEntity)
     }
+
+    override suspend fun saveSettingsBackup(temperature: Int, fanSpeed: Int) {
+        dataSource.saveBackup(temperature, fanSpeed)
+    }
+
+    override suspend fun getSettingsBackup(): Pair<Int, Int> {
+        return dataSource.getBackup()
+    }
 }
