@@ -21,6 +21,9 @@ class HvacDataSource(private val context: Context) {
         val TEMPERATURE = intPreferencesKey("temperature")
         val FAN_SPEED = intPreferencesKey("fan_speed")
         val IS_FRONT_DEFROSTER_ON = booleanPreferencesKey("is_front_defroster_on")
+
+        val SAVED_TEMPERATURE = intPreferencesKey("saved_temperature")
+        val SAVED_FAN_SPEED = intPreferencesKey("saved_fan_speed")
     }
 
     val hvacState: Flow<HvacEntity> = context.dataStore.data.map { preferences ->
@@ -28,7 +31,10 @@ class HvacDataSource(private val context: Context) {
             isPowerOn = preferences[PreferencesKeys.IS_POWER_ON] ?: true,
             temperature = preferences[PreferencesKeys.TEMPERATURE] ?: Constants.TEMPERATURE_DEFAULT,
             fanSpeed = preferences[PreferencesKeys.FAN_SPEED] ?: Constants.FAN_SPEED_MIN,
-            isFrontDefrosterOn = preferences[PreferencesKeys.IS_FRONT_DEFROSTER_ON] ?: false
+            isFrontDefrosterOn = preferences[PreferencesKeys.IS_FRONT_DEFROSTER_ON] ?: false,
+
+            savedTemperature = preferences[PreferencesKeys.SAVED_TEMPERATURE] ?: Constants.TEMPERATURE_DEFAULT,
+            savedFanSpeed = preferences[PreferencesKeys.SAVED_FAN_SPEED] ?: Constants.FAN_SPEED_MIN
         )
     }
 
@@ -38,6 +44,9 @@ class HvacDataSource(private val context: Context) {
             preferences[PreferencesKeys.TEMPERATURE] = newState.temperature
             preferences[PreferencesKeys.FAN_SPEED] = newState.fanSpeed
             preferences[PreferencesKeys.IS_FRONT_DEFROSTER_ON] = newState.isFrontDefrosterOn
+
+            preferences[PreferencesKeys.SAVED_TEMPERATURE] = newState.savedTemperature
+            preferences[PreferencesKeys.SAVED_FAN_SPEED] = newState.savedFanSpeed
         }
     }
 }
