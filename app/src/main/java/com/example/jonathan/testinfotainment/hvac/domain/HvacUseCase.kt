@@ -1,5 +1,6 @@
 package com.example.jonathan.testinfotainment.hvac.domain
 
+import com.example.jonathan.testinfotainment.common.Constants
 import kotlinx.coroutines.flow.Flow
 
 class HvacUseCase(private val repository: HvacRepository) {
@@ -12,17 +13,17 @@ class HvacUseCase(private val repository: HvacRepository) {
 
     suspend fun adjustTemperature(currentState: HvacEntity, delta: Int) {
         if (!currentState.isPowerOn) return
-        val newTemp = (currentState.temperature + delta).coerceIn(63, 91)
+        val newTemp = (currentState.temperature + delta).coerceIn(Constants.TEMPERATURE_MIN, Constants.TEMPERATURE_MAX)
         repository.updateHvacState(currentState.copy(temperature = newTemp))
     }
 
     suspend fun adjustFanSpeed(currentState: HvacEntity, delta: Int) {
         if (!currentState.isPowerOn) return
-        if (currentState.fanSpeed == 1 && delta < 0) {
+        if (currentState.fanSpeed == Constants.FAN_SPEED_MIN && delta < 0) {
             repository.updateHvacState(currentState.copy(isPowerOn = false))
             return
         }
-        val newFanSpeed = (currentState.fanSpeed + delta).coerceIn(1, 7)
+        val newFanSpeed = (currentState.fanSpeed + delta).coerceIn(Constants.FAN_SPEED_MIN, Constants.FAN_SPEED_MAX)
         repository.updateHvacState(currentState.copy(fanSpeed = newFanSpeed))
     }
 
@@ -33,8 +34,8 @@ class HvacUseCase(private val repository: HvacRepository) {
             repository.updateHvacState(
                 currentState.copy(
                     isFrontDefrosterOn = true,
-                    temperature = 91,
-                    fanSpeed = 7
+                    temperature = Constants.TEMPERATURE_MAX,
+                    fanSpeed = Constants.FAN_SPEED_MAX
                 )
             )
         } else {

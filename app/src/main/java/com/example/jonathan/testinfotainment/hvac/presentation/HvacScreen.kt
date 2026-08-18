@@ -1,6 +1,7 @@
 package com.example.jonathan.testinfotainment.hvac.presentation
 
 import androidx.compose.foundation.background
+import com.example.jonathan.testinfotainment.common.Constants
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -46,8 +47,8 @@ fun HvacScreen(viewModel: HvacViewModel) {
         HvacValueControl(
             icon = Icons.Default.DeviceThermostat,
             value = when (state.temperature) {
-                63 -> "LO"
-                91 -> "HI"
+                Constants.TEMPERATURE_MIN -> "LO"
+                Constants.TEMPERATURE_MAX -> "HI"
                 else -> "${state.temperature}°F"
             },
             enabled = state.isPowerOn,
