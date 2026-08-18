@@ -1,6 +1,5 @@
 package com.example.jonathan.testinfotainment.hvac.presentation
 
-import androidx.compose.foundation.background
 import com.example.jonathan.testinfotainment.common.Constants
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -40,7 +39,8 @@ fun HvacScreen(viewModel: HvacViewModel) {
             icon = Icons.Default.PowerSettingsNew,
             isSelected = state.isPowerOn,
             onClick = { viewModel.onIntent(HvacIntent.TogglePower) },
-            label = if (state.isPowerOn) "ON" else "OFF"
+            label = if (state.isPowerOn) "ON" else "OFF",
+            isPrimaryAction = true
         )
 
         // Temperature Control
@@ -82,14 +82,21 @@ fun HvacControlButton(
     isSelected: Boolean,
     onClick: () -> Unit,
     label: String,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    isPrimaryAction: Boolean = false
 ) {
     Button(
         onClick = onClick,
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(
             containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-            contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+            contentColor = if (isSelected) {
+                MaterialTheme.colorScheme.onPrimary
+            } else if (isPrimaryAction) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            }
         ),
         modifier = Modifier.size(width = 120.dp, height = 80.dp),
         shape = MaterialTheme.shapes.medium
