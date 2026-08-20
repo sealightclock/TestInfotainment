@@ -12,12 +12,13 @@ import com.example.jonathan.testinfotainment.hvac.domain.HvacEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import java.io.IOException
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "hvac_settings")
 
 class HvacDataSource(private val context: Context) {
 
-    private object PreferencesKeys {
+    internal object PreferencesKeys {
         val IS_POWER_ON = booleanPreferencesKey("is_power_on")
         val TEMPERATURE = intPreferencesKey("temperature")
         val FAN_SPEED = intPreferencesKey("fan_speed")
@@ -45,17 +46,31 @@ class HvacDataSource(private val context: Context) {
         }
     }
 
-    suspend fun saveBackup(temperature: Int, fanSpeed: Int) {
+    suspend fun setInt(key: Preferences.Key<Int>, value: Int) {
         context.dataStore.edit { preferences ->
-            preferences[PreferencesKeys.SAVED_TEMPERATURE] = temperature
-            preferences[PreferencesKeys.SAVED_FAN_SPEED] = fanSpeed
+            preferences[key] = value
         }
     }
 
-    suspend fun getBackup(): Pair<Int, Int> {
-        val preferences = context.dataStore.data.first()
-        val temp = preferences[PreferencesKeys.SAVED_TEMPERATURE] ?: Constants.TEMPERATURE_DEFAULT
-        val fan = preferences[PreferencesKeys.SAVED_FAN_SPEED] ?: Constants.FAN_SPEED_MIN
-        return Pair(temp, fan)
+    suspend fun getInt(key: Preferences.Key<Int>, defaultValue: Int): Int {
+        return try {
+            context.dataStore.data.first()[key] ?: defaultValue
+        } catch (e: IOException) {
+            defaultValue
+        }
+    }
+
+    suspend fun setBoolean(key: Preferences.Key<Boolean>, value: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[key] = value
+        }
+    }
+
+    suspend fun getBoolean(key: Preferences.Key<Boolean>, defaultValue: Boolean): Boolean {
+        return try {
+            context.dataStore.data.first()[key] ?: defaultValue
+        } catch (e: IOException) {
+            defaultValue
+        }
     }
 }
