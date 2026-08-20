@@ -20,6 +20,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
     // Local source of truth for immediate UI updates
     private var currentEntity = HvacEntity()
     private var lastTemperatureUpdateTimestamp: Long = 0
+    private var lastFanSpeedUpdateTimestamp: Long = 0
 
     init {
         viewModelScope.launch {
@@ -45,24 +46,40 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                     lastTemperatureUpdateTimestamp = System.currentTimeMillis()
                     useCase.adjustTemperature(currentEntity, -1)
                 }
-                HvacIntent.IncreaseFanSpeed -> useCase.adjustFanSpeed(currentEntity, 1)
-                HvacIntent.DecreaseFanSpeed -> useCase.adjustFanSpeed(currentEntity, -1)
+                HvacIntent.IncreaseFanSpeed -> {
+                    lastFanSpeedUpdateTimestamp = System.currentTimeMillis()
+                    useCase.adjustFanSpeed(currentEntity, 1)
+                }
+                HvacIntent.DecreaseFanSpeed -> {
+                    lastFanSpeedUpdateTimestamp = System.currentTimeMillis()
+                    useCase.adjustFanSpeed(currentEntity, -1)
+                }
                 HvacIntent.ToggleFrontDefroster -> {
                     lastTemperatureUpdateTimestamp = System.currentTimeMillis()
+                    lastFanSpeedUpdateTimestamp = System.currentTimeMillis()
                     useCase.toggleFrontDefroster(currentEntity)
                 }
                 is HvacIntent.RefreshFromPlatform -> {
                     val currentTime = System.currentTimeMillis()
                     val platformEntity = intent.entity
                     
-                    // Reject Platform temperature if the user modified it recently.
-                    // Increased threshold to 2 seconds to account for the total round-trip delay 
-                    // (1s in PlatformDataSource + 1s in ViewModel delay).
-                    val mergedEntity = if (currentTime - lastTemperatureUpdateTimestamp < 2000) {
-                        platformEntity.copy(temperature = currentEntity.temperature)
+                    // Reject Platform values if the user modified them recently (within 2s threshold).
+                    val mergedTemperature = if (currentTime - lastTemperatureUpdateTimestamp < 2000) {
+                        currentEntity.temperature
                     } else {
-                        platformEntity
+                        platformEntity.temperature
                     }
+
+                    val mergedFanSpeed = if (currentTime - lastFanSpeedUpdateTimestamp < 2000) {
+                        currentEntity.fanSpeed
+                    } else {
+                        platformEntity.fanSpeed
+                    }
+                    
+                    val mergedEntity = platformEntity.copy(
+                        temperature = mergedTemperature,
+                        fanSpeed = mergedFanSpeed
+                    )
                     
                     updateUi(mergedEntity)
                     null
