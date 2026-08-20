@@ -28,7 +28,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.jonathan.testinfotainment.hvac.data.HvacDataSource
+import com.example.jonathan.testinfotainment.hvac.data.HvacLocalDataSource
+import com.example.jonathan.testinfotainment.hvac.data.HvacPlatformDataSource
 import com.example.jonathan.testinfotainment.hvac.data.HvacRepositoryImpl
 import com.example.jonathan.testinfotainment.hvac.domain.HvacUseCase
 import com.example.jonathan.testinfotainment.hvac.presentation.HvacScreen
@@ -52,8 +53,9 @@ fun MainScreen() {
     val hvacViewModel: HvacViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val dataSource = HvacDataSource(context.applicationContext)
-                val repository = HvacRepositoryImpl(dataSource)
+                val localDataSource = HvacLocalDataSource(context.applicationContext)
+                val platformDataSource = HvacPlatformDataSource()
+                val repository = HvacRepositoryImpl(localDataSource, platformDataSource)
                 val useCase = HvacUseCase(repository)
                 @Suppress("UNCHECKED_CAST")
                 return HvacViewModel(useCase) as T
