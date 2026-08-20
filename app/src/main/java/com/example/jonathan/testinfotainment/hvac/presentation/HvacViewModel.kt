@@ -7,6 +7,7 @@ import com.example.jonathan.testinfotainment.hvac.domain.HvacUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
@@ -18,10 +19,13 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
 
     // Local source of truth for immediate UI updates
     private var currentEntity = HvacEntity()
+    private var lastTemperatureUpdateTimestamp: Long = 0
 
     init {
         viewModelScope.launch {
-            useCase.getHvacState().collect { entity ->
+            // Use collectLatest to skip intermediate platform updates if they arrive rapidly.
+            // This satisfies the 1s wait requirement while avoiding a backlog of stale updates.
+            useCase.getHvacState().collectLatest { entity ->
                 // [3] Presentation layer waits for 1 second after receiving value from Platform
                 delay(1000)
                 onIntent(HvacIntent.RefreshFromPlatform(entity))
@@ -33,13 +37,34 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
         viewModelScope.launch {
             val nextEntity: HvacEntity? = when (intent) {
                 HvacIntent.TogglePower -> useCase.togglePower(currentEntity)
-                HvacIntent.IncreaseTemperature -> useCase.adjustTemperature(currentEntity, 1)
-                HvacIntent.DecreaseTemperature -> useCase.adjustTemperature(currentEntity, -1)
+                HvacIntent.IncreaseTemperature -> {
+                    lastTemperatureUpdateTimestamp = System.currentTimeMillis()
+                    useCase.adjustTemperature(currentEntity, 1)
+                }
+                HvacIntent.DecreaseTemperature -> {
+                    lastTemperatureUpdateTimestamp = System.currentTimeMillis()
+                    useCase.adjustTemperature(currentEntity, -1)
+                }
                 HvacIntent.IncreaseFanSpeed -> useCase.adjustFanSpeed(currentEntity, 1)
                 HvacIntent.DecreaseFanSpeed -> useCase.adjustFanSpeed(currentEntity, -1)
-                HvacIntent.ToggleFrontDefroster -> useCase.toggleFrontDefroster(currentEntity)
+                HvacIntent.ToggleFrontDefroster -> {
+                    lastTemperatureUpdateTimestamp = System.currentTimeMillis()
+                    useCase.toggleFrontDefroster(currentEntity)
+                }
                 is HvacIntent.RefreshFromPlatform -> {
-                    updateUi(intent.entity)
+                    val currentTime = System.currentTimeMillis()
+                    val platformEntity = intent.entity
+                    
+                    // Reject Platform temperature if the user modified it recently.
+                    // Increased threshold to 2 seconds to account for the total round-trip delay 
+                    // (1s in PlatformDataSource + 1s in ViewModel delay).
+                    val mergedEntity = if (currentTime - lastTemperatureUpdateTimestamp < 2000) {
+                        platformEntity.copy(temperature = currentEntity.temperature)
+                    } else {
+                        platformEntity
+                    }
+                    
+                    updateUi(mergedEntity)
                     null
                 }
             }
