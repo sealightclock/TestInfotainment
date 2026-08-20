@@ -6,29 +6,35 @@ import kotlinx.coroutines.flow.Flow
 class HvacUseCase(private val repository: HvacRepository) {
     fun getHvacState(): Flow<HvacEntity> = repository.getHvacState()
 
-    suspend fun togglePower(currentState: HvacEntity) {
+    suspend fun togglePower(currentState: HvacEntity): HvacEntity {
         val newState = currentState.copy(isPowerOn = !currentState.isPowerOn)
         repository.updateHvacState(newState)
+        return newState
     }
 
-    suspend fun adjustTemperature(currentState: HvacEntity, delta: Int) {
-        if (!currentState.isPowerOn) return
+    suspend fun adjustTemperature(currentState: HvacEntity, delta: Int): HvacEntity {
+        if (!currentState.isPowerOn) return currentState
         val newTemp = (currentState.temperature + delta).coerceIn(Constants.TEMPERATURE_MIN, Constants.TEMPERATURE_MAX)
-        repository.updateHvacState(currentState.copy(temperature = newTemp))
+        val newState = currentState.copy(temperature = newTemp)
+        repository.updateHvacState(newState)
+        return newState
     }
 
-    suspend fun adjustFanSpeed(currentState: HvacEntity, delta: Int) {
-        if (!currentState.isPowerOn) return
+    suspend fun adjustFanSpeed(currentState: HvacEntity, delta: Int): HvacEntity {
+        if (!currentState.isPowerOn) return currentState
         if (currentState.fanSpeed == Constants.FAN_SPEED_MIN && delta < 0) {
-            repository.updateHvacState(currentState.copy(isPowerOn = false))
-            return
+            val newState = currentState.copy(isPowerOn = false)
+            repository.updateHvacState(newState)
+            return newState
         }
         val newFanSpeed = (currentState.fanSpeed + delta).coerceIn(Constants.FAN_SPEED_MIN, Constants.FAN_SPEED_MAX)
-        repository.updateHvacState(currentState.copy(fanSpeed = newFanSpeed))
+        val newState = currentState.copy(fanSpeed = newFanSpeed)
+        repository.updateHvacState(newState)
+        return newState
     }
 
-    suspend fun toggleFrontDefroster(currentState: HvacEntity) {
-        if (!currentState.isPowerOn) return
+    suspend fun toggleFrontDefroster(currentState: HvacEntity): HvacEntity {
+        if (!currentState.isPowerOn) return currentState
         val turningOn = !currentState.isFrontDefrosterOn
         val newState = if (turningOn) {
             currentState.copy(
@@ -46,5 +52,6 @@ class HvacUseCase(private val repository: HvacRepository) {
             )
         }
         repository.updateHvacState(newState)
+        return newState
     }
 }
