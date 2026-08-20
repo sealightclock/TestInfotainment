@@ -31,8 +31,6 @@ class HvacRepositoryImpl(private val dataSource: HvacDataSource) : HvacRepositor
     private fun HvacProperty.toIntKey() = when (this) {
         HvacProperty.TEMPERATURE -> HvacDataSource.PreferencesKeys.TEMPERATURE
         HvacProperty.FAN_SPEED -> HvacDataSource.PreferencesKeys.FAN_SPEED
-        HvacProperty.SAVED_TEMPERATURE -> HvacDataSource.PreferencesKeys.SAVED_TEMPERATURE
-        HvacProperty.SAVED_FAN_SPEED -> HvacDataSource.PreferencesKeys.SAVED_FAN_SPEED
         else -> throw IllegalArgumentException("Property $this is not an Int type")
     }
 

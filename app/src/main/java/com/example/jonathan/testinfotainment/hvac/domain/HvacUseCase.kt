@@ -29,29 +29,7 @@ class HvacUseCase(private val repository: HvacRepository) {
 
     suspend fun toggleFrontDefroster(currentState: HvacEntity) {
         if (!currentState.isPowerOn) return
-        val isDefrosterOn = !currentState.isFrontDefrosterOn
-        if (isDefrosterOn) {
-            // Turning ON: Save current values to backup, then set to MAX
-            repository.saveInt(HvacProperty.SAVED_TEMPERATURE, currentState.temperature)
-            repository.saveInt(HvacProperty.SAVED_FAN_SPEED, currentState.fanSpeed)
-            repository.updateHvacState(
-                currentState.copy(
-                    isFrontDefrosterOn = true,
-                    temperature = Constants.TEMPERATURE_MAX,
-                    fanSpeed = Constants.FAN_SPEED_MAX
-                )
-            )
-        } else {
-            // Turning OFF: Restore from backup
-            val savedTemp = repository.getInt(HvacProperty.SAVED_TEMPERATURE, Constants.TEMPERATURE_DEFAULT)
-            val savedFan = repository.getInt(HvacProperty.SAVED_FAN_SPEED, Constants.FAN_SPEED_MIN)
-            repository.updateHvacState(
-                currentState.copy(
-                    isFrontDefrosterOn = false,
-                    temperature = savedTemp,
-                    fanSpeed = savedFan
-                )
-            )
-        }
+        val newState = currentState.copy(isFrontDefrosterOn = !currentState.isFrontDefrosterOn)
+        repository.updateHvacState(newState)
     }
 }

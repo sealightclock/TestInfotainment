@@ -23,25 +23,32 @@ class HvacDataSource(private val context: Context) {
         val TEMPERATURE = intPreferencesKey("temperature")
         val FAN_SPEED = intPreferencesKey("fan_speed")
         val IS_FRONT_DEFROSTER_ON = booleanPreferencesKey("is_front_defroster_on")
-
-        val SAVED_TEMPERATURE = intPreferencesKey("saved_temperature")
-        val SAVED_FAN_SPEED = intPreferencesKey("saved_fan_speed")
     }
 
     val hvacState: Flow<HvacEntity> = context.dataStore.data.map { preferences ->
+        val isDefrosterOn = preferences[PreferencesKeys.IS_FRONT_DEFROSTER_ON] ?: false
         HvacEntity(
             isPowerOn = preferences[PreferencesKeys.IS_POWER_ON] ?: true,
-            temperature = preferences[PreferencesKeys.TEMPERATURE] ?: Constants.TEMPERATURE_DEFAULT,
-            fanSpeed = preferences[PreferencesKeys.FAN_SPEED] ?: Constants.FAN_SPEED_MIN,
-            isFrontDefrosterOn = preferences[PreferencesKeys.IS_FRONT_DEFROSTER_ON] ?: false
+            temperature = if (isDefrosterOn) Constants.TEMPERATURE_MAX else (preferences[PreferencesKeys.TEMPERATURE] ?: Constants.TEMPERATURE_DEFAULT),
+            fanSpeed = if (isDefrosterOn) Constants.FAN_SPEED_MAX else (preferences[PreferencesKeys.FAN_SPEED] ?: Constants.FAN_SPEED_MIN),
+            isFrontDefrosterOn = isDefrosterOn
         )
     }
 
     suspend fun updateState(newState: HvacEntity) {
         context.dataStore.edit { preferences ->
+            val wasDefrosting = preferences[PreferencesKeys.IS_FRONT_DEFROSTER_ON] ?: false
+
             preferences[PreferencesKeys.IS_POWER_ON] = newState.isPowerOn
-            preferences[PreferencesKeys.TEMPERATURE] = newState.temperature
-            preferences[PreferencesKeys.FAN_SPEED] = newState.fanSpeed
+
+            // Only save temperature/fan if we are NOT in defroster mode.
+            // When defroster is ON, we show HI/MAX but don't overwrite user preferences in DataStore.
+            // When defroster is turned OFF, we revert to the previously stored values.
+            if (!wasDefrosting && !newState.isFrontDefrosterOn) {
+                preferences[PreferencesKeys.TEMPERATURE] = newState.temperature
+                preferences[PreferencesKeys.FAN_SPEED] = newState.fanSpeed
+            }
+
             preferences[PreferencesKeys.IS_FRONT_DEFROSTER_ON] = newState.isFrontDefrosterOn
         }
     }
