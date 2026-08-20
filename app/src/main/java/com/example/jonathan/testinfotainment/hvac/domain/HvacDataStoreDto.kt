@@ -1,6 +1,6 @@
 package com.example.jonathan.testinfotainment.hvac.domain
 
-enum class HvacProperty {
+enum class HvacDataStoreDto {
     TEMPERATURE,
     FAN_SPEED,
     IS_POWER_ON,
