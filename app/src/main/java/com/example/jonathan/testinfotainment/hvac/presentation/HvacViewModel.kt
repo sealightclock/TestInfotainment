@@ -22,6 +22,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
     private var lastTemperatureUpdateTimestamp: Long = 0
     private var lastFanSpeedUpdateTimestamp: Long = 0
     private var lastPowerUpdateTimestamp: Long = 0
+    private var lastFrontDefrosterUpdateTimestamp: Long = 0
 
     init {
         viewModelScope.launch {
@@ -64,9 +65,15 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                     useCase.adjustFanSpeed(currentEntity, -1)
                 }
                 HvacIntent.ToggleFrontDefroster -> {
-                    lastTemperatureUpdateTimestamp = System.currentTimeMillis()
-                    lastFanSpeedUpdateTimestamp = System.currentTimeMillis()
-                    useCase.toggleFrontDefroster(currentEntity)
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - lastFrontDefrosterUpdateTimestamp >= 2000) {
+                        lastFrontDefrosterUpdateTimestamp = currentTime
+                        lastTemperatureUpdateTimestamp = currentTime
+                        lastFanSpeedUpdateTimestamp = currentTime
+                        useCase.toggleFrontDefroster(currentEntity)
+                    } else {
+                        null
+                    }
                 }
                 is HvacIntent.RefreshFromPlatform -> {
                     val currentTime = System.currentTimeMillis()
