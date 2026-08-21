@@ -21,6 +21,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
     private var currentEntity = HvacEntity()
     private var lastTemperatureUpdateTimestamp: Long = 0
     private var lastFanSpeedUpdateTimestamp: Long = 0
+    private var lastPowerUpdateTimestamp: Long = 0
 
     init {
         viewModelScope.launch {
@@ -37,7 +38,15 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
     fun onIntent(intent: HvacIntent) {
         viewModelScope.launch {
             val nextEntity: HvacEntity? = when (intent) {
-                HvacIntent.TogglePower -> useCase.togglePower(currentEntity)
+                HvacIntent.TogglePower -> {
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - lastPowerUpdateTimestamp >= 2000) {
+                        lastPowerUpdateTimestamp = currentTime
+                        useCase.togglePower(currentEntity)
+                    } else {
+                        null
+                    }
+                }
                 HvacIntent.IncreaseTemperature -> {
                     lastTemperatureUpdateTimestamp = System.currentTimeMillis()
                     useCase.adjustTemperature(currentEntity, 1)
