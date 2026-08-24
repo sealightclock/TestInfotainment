@@ -50,7 +50,8 @@ fun HvacScreen(viewModel: HvacViewModel) {
             isSelected = state.isPowerOn,
             onClick = { viewModel.onIntent(HvacIntent.TogglePower) },
             label = if (state.isPowerOn) "ON" else "OFF",
-            isPrimaryAction = true
+            isPrimaryAction = true,
+            enabled = state.isPowerButtonEnabled
         )
 
         // Temperature Control
