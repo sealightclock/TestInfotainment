@@ -62,7 +62,7 @@ fun HvacScreen(viewModel: HvacViewModel) {
                 Constants.TEMPERATURE_MAX -> "HI"
                 else -> "${state.temperature}°F"
             },
-            enabled = state.isPowerOn,
+            enabled = state.isPowerOn && !state.isFrontDefrosterOn,
             onIncrease = { viewModel.onIntent(HvacIntent.IncreaseTemperature) },
             onDecrease = { viewModel.onIntent(HvacIntent.DecreaseTemperature) }
         )
@@ -71,7 +71,7 @@ fun HvacScreen(viewModel: HvacViewModel) {
         HvacValueControl(
             icon = Icons.Default.Air,
             value = state.fanSpeed.toString(),
-            enabled = state.isPowerOn,
+            enabled = state.isPowerOn && !state.isFrontDefrosterOn,
             onIncrease = { viewModel.onIntent(HvacIntent.IncreaseFanSpeed) },
             onDecrease = { viewModel.onIntent(HvacIntent.DecreaseFanSpeed) }
         )

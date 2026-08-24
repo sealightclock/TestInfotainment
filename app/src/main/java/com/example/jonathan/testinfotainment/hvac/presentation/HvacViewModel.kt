@@ -53,20 +53,28 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                     useCase.togglePower(entityBeforeChange)
                 }
                 HvacIntent.IncreaseTemperature -> {
-                    lastTemperatureUpdateTimestamp = System.currentTimeMillis()
-                    useCase.adjustTemperature(currentEntity, 1)
+                    if (!currentEntity.isFrontDefrosterOn) {
+                        lastTemperatureUpdateTimestamp = System.currentTimeMillis()
+                        useCase.adjustTemperature(currentEntity, 1)
+                    } else null
                 }
                 HvacIntent.DecreaseTemperature -> {
-                    lastTemperatureUpdateTimestamp = System.currentTimeMillis()
-                    useCase.adjustTemperature(currentEntity, -1)
+                    if (!currentEntity.isFrontDefrosterOn) {
+                        lastTemperatureUpdateTimestamp = System.currentTimeMillis()
+                        useCase.adjustTemperature(currentEntity, -1)
+                    } else null
                 }
                 HvacIntent.IncreaseFanSpeed -> {
-                    lastFanSpeedUpdateTimestamp = System.currentTimeMillis()
-                    useCase.adjustFanSpeed(currentEntity, 1)
+                    if (!currentEntity.isFrontDefrosterOn) {
+                        lastFanSpeedUpdateTimestamp = System.currentTimeMillis()
+                        useCase.adjustFanSpeed(currentEntity, 1)
+                    } else null
                 }
                 HvacIntent.DecreaseFanSpeed -> {
-                    lastFanSpeedUpdateTimestamp = System.currentTimeMillis()
-                    useCase.adjustFanSpeed(currentEntity, -1)
+                    if (!currentEntity.isFrontDefrosterOn) {
+                        lastFanSpeedUpdateTimestamp = System.currentTimeMillis()
+                        useCase.adjustFanSpeed(currentEntity, -1)
+                    } else null
                 }
                 HvacIntent.ToggleFrontDefroster -> {
                     val entityBeforeChange = currentEntity
@@ -79,18 +87,8 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                         delay(2000)
                         _state.update { it.copy(isFrontDefrosterButtonEnabled = true) }
                     }
-                    // Optimistic update
-                    val turningOn = !entityBeforeChange.isFrontDefrosterOn
-                    val optimisticEntity = if (turningOn) {
-                        entityBeforeChange.copy(
-                            isFrontDefrosterOn = true,
-                            temperature = Constants.TEMPERATURE_MAX,
-                            fanSpeed = Constants.FAN_SPEED_MAX
-                        )
-                    } else {
-                        entityBeforeChange.copy(isFrontDefrosterOn = false)
-                    }
-                    updateUi(optimisticEntity)
+                    // Optimistic update - just toggle the boolean, updateUi handles the overrides
+                    updateUi(entityBeforeChange.copy(isFrontDefrosterOn = !entityBeforeChange.isFrontDefrosterOn))
                     useCase.toggleFrontDefroster(entityBeforeChange)
                 }
                 is HvacIntent.RefreshFromPlatform -> {
@@ -144,8 +142,8 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
         _state.update {
             it.copy(
                 isPowerOn = entity.isPowerOn,
-                temperature = entity.temperature,
-                fanSpeed = entity.fanSpeed,
+                temperature = if (entity.isFrontDefrosterOn) Constants.TEMPERATURE_MAX else entity.temperature,
+                fanSpeed = if (entity.isFrontDefrosterOn) Constants.FAN_SPEED_MAX else entity.fanSpeed,
                 isFrontDefrosterOn = entity.isFrontDefrosterOn
             )
         }
