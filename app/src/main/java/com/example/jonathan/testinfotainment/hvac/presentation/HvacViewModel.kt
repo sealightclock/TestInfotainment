@@ -2,7 +2,6 @@ package com.example.jonathan.testinfotainment.hvac.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.jonathan.testinfotainment.common.Constants
 import com.example.jonathan.testinfotainment.hvac.domain.HvacEntity
 import com.example.jonathan.testinfotainment.hvac.domain.HvacUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -140,12 +139,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
     private fun updateUi(entity: HvacEntity) {
         currentEntity = entity
         _state.update {
-            it.copy(
-                isPowerOn = entity.isPowerOn,
-                temperature = if (entity.isFrontDefrosterOn) Constants.TEMPERATURE_MAX else entity.temperature,
-                fanSpeed = if (entity.isFrontDefrosterOn) Constants.FAN_SPEED_MAX else entity.fanSpeed,
-                isFrontDefrosterOn = entity.isFrontDefrosterOn
-            )
+            it.copy(hvac = entity)
         }
     }
 }
