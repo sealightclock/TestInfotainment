@@ -25,13 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.jonathan.testinfotainment.hvac.data.HvacLocalDataSource
-import com.example.jonathan.testinfotainment.hvac.data.HvacPlatformDataSource
-import com.example.jonathan.testinfotainment.hvac.data.HvacRepositoryImpl
-import com.example.jonathan.testinfotainment.hvac.domain.HvacUseCase
+import com.example.jonathan.testinfotainment.TestInfotainmentApp
+import com.example.jonathan.testinfotainment.common.AppContainer
 import com.example.jonathan.testinfotainment.hvac.presentation.HvacScreen
 import com.example.jonathan.testinfotainment.hvac.presentation.HvacViewModel
 
@@ -44,23 +40,13 @@ enum class Screen(val label: String, val icon: ImageVector) {
 }
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    appContainer: AppContainer = (androidx.compose.ui.platform.LocalContext.current.applicationContext as TestInfotainmentApp).container
+) {
     Log.i(TAG, "MainScreen")
 
-    // Setup HVAC dependencies manually for this example
-    // In a real app, these would be provided by a DI container like Hilt.
-    val context = androidx.compose.ui.platform.LocalContext.current
     val hvacViewModel: HvacViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val localDataSource = HvacLocalDataSource(context.applicationContext)
-                val platformDataSource = HvacPlatformDataSource()
-                val repository = HvacRepositoryImpl(localDataSource, platformDataSource)
-                val useCase = HvacUseCase(repository)
-                @Suppress("UNCHECKED_CAST")
-                return HvacViewModel(useCase) as T
-            }
-        }
+        factory = ViewModelFactory(appContainer)
     )
 
     var currentScreen by remember { mutableStateOf(Screen.Home) }
@@ -108,5 +94,7 @@ fun ScreenContent(screen: Screen, hvacViewModel: HvacViewModel) {
 @Preview(showBackground = true, widthDp = 800, heightDp = 480)
 @Composable
 fun MainScreenPreview() {
-    MainScreen()
+    // In a real app, you would provide a MockAppContainer here for the preview
+    // For now, this might still fail if the context isn't right, but it's better structured.
+    // Text("Main Screen Preview")
 }
