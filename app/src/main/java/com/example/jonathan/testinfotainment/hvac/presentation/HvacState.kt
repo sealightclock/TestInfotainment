@@ -7,5 +7,6 @@ data class HvacState(
     val isPowerButtonEnabled: Boolean = true,
     val temperature: Int = Constants.TEMPERATURE_DEFAULT,
     val fanSpeed: Int = Constants.FAN_SPEED_MIN,
-    val isFrontDefrosterOn: Boolean = false
+    val isFrontDefrosterOn: Boolean = false,
+    val isFrontDefrosterButtonEnabled: Boolean = true
 )

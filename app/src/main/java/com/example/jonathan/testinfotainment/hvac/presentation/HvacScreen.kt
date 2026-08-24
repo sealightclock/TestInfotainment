@@ -80,7 +80,7 @@ fun HvacScreen(viewModel: HvacViewModel) {
         HvacControlButton(
             icon = Icons.Default.WindPower,
             isSelected = state.isFrontDefrosterOn,
-            enabled = state.isPowerOn,
+            enabled = state.isPowerOn && state.isFrontDefrosterButtonEnabled,
             onClick = { viewModel.onIntent(HvacIntent.ToggleFrontDefroster) },
             label = "FRONT"
         )

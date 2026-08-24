@@ -2,6 +2,7 @@ package com.example.jonathan.testinfotainment.hvac.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.jonathan.testinfotainment.common.Constants
 import com.example.jonathan.testinfotainment.hvac.domain.HvacEntity
 import com.example.jonathan.testinfotainment.hvac.domain.HvacUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +22,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
     private var currentEntity = HvacEntity()
     private var lastTemperatureUpdateTimestamp: Long = 0
     private var lastFanSpeedUpdateTimestamp: Long = 0
+    private var lastPowerUpdateTimestamp: Long = 0
     private var lastFrontDefrosterUpdateTimestamp: Long = 0
 
     init {
@@ -39,12 +41,16 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
         viewModelScope.launch {
             val nextEntity: HvacEntity? = when (intent) {
                 HvacIntent.TogglePower -> {
+                    val entityBeforeChange = currentEntity
+                    lastPowerUpdateTimestamp = System.currentTimeMillis()
                     _state.update { it.copy(isPowerButtonEnabled = false) }
                     viewModelScope.launch {
                         delay(2000)
                         _state.update { it.copy(isPowerButtonEnabled = true) }
                     }
-                    useCase.togglePower(currentEntity)
+                    // Optimistic update
+                    updateUi(entityBeforeChange.copy(isPowerOn = !entityBeforeChange.isPowerOn))
+                    useCase.togglePower(entityBeforeChange)
                 }
                 HvacIntent.IncreaseTemperature -> {
                     lastTemperatureUpdateTimestamp = System.currentTimeMillis()
@@ -63,21 +69,41 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                     useCase.adjustFanSpeed(currentEntity, -1)
                 }
                 HvacIntent.ToggleFrontDefroster -> {
+                    val entityBeforeChange = currentEntity
                     val currentTime = System.currentTimeMillis()
-                    if (currentTime - lastFrontDefrosterUpdateTimestamp >= 2000) {
-                        lastFrontDefrosterUpdateTimestamp = currentTime
-                        lastTemperatureUpdateTimestamp = currentTime
-                        lastFanSpeedUpdateTimestamp = currentTime
-                        useCase.toggleFrontDefroster(currentEntity)
-                    } else {
-                        null
+                    lastFrontDefrosterUpdateTimestamp = currentTime
+                    lastTemperatureUpdateTimestamp = currentTime
+                    lastFanSpeedUpdateTimestamp = currentTime
+                    _state.update { it.copy(isFrontDefrosterButtonEnabled = false) }
+                    viewModelScope.launch {
+                        delay(2000)
+                        _state.update { it.copy(isFrontDefrosterButtonEnabled = true) }
                     }
+                    // Optimistic update
+                    val turningOn = !entityBeforeChange.isFrontDefrosterOn
+                    val optimisticEntity = if (turningOn) {
+                        entityBeforeChange.copy(
+                            isFrontDefrosterOn = true,
+                            temperature = Constants.TEMPERATURE_MAX,
+                            fanSpeed = Constants.FAN_SPEED_MAX
+                        )
+                    } else {
+                        entityBeforeChange.copy(isFrontDefrosterOn = false)
+                    }
+                    updateUi(optimisticEntity)
+                    useCase.toggleFrontDefroster(entityBeforeChange)
                 }
                 is HvacIntent.RefreshFromPlatform -> {
                     val currentTime = System.currentTimeMillis()
                     val platformEntity = intent.entity
                     
                     // Reject Platform values if the user modified them recently (within 2s threshold).
+                    val mergedPower = if (currentTime - lastPowerUpdateTimestamp < 2000) {
+                        currentEntity.isPowerOn
+                    } else {
+                        platformEntity.isPowerOn
+                    }
+
                     val mergedTemperature = if (currentTime - lastTemperatureUpdateTimestamp < 2000) {
                         currentEntity.temperature
                     } else {
@@ -89,10 +115,18 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                     } else {
                         platformEntity.fanSpeed
                     }
+
+                    val mergedFrontDefroster = if (currentTime - lastFrontDefrosterUpdateTimestamp < 2000) {
+                        currentEntity.isFrontDefrosterOn
+                    } else {
+                        platformEntity.isFrontDefrosterOn
+                    }
                     
                     val mergedEntity = platformEntity.copy(
+                        isPowerOn = mergedPower,
                         temperature = mergedTemperature,
-                        fanSpeed = mergedFanSpeed
+                        fanSpeed = mergedFanSpeed,
+                        isFrontDefrosterOn = mergedFrontDefroster
                     )
                     
                     updateUi(mergedEntity)
