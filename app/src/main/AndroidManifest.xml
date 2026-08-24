@@ -11,6 +11,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TestInfotainment">
+
+        <!--
+             MainActivity: The main entry point of the application.
+             - exported="true" is required for the launcher activity so the system can start it.
+             - windowSoftInputMode="adjustResize" ensures the UI shifts to accommodate the
+               software keyboard, which is critical for Compose-based layouts.
+        -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
