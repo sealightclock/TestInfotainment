@@ -16,8 +16,15 @@ import java.io.IOException
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "hvac_settings")
 
+/**
+ * Local data source using DataStore for persisting HVAC settings.
+ * This allows the app to remember user preferences across app restarts.
+ */
 class HvacLocalDataSource(private val context: Context) : HvacDataSource {
 
+    /**
+     * Keys used for DataStore preferences.
+     */
     internal object PreferencesKeys {
         val IS_POWER_ON = booleanPreferencesKey("is_power_on")
         val TEMPERATURE = intPreferencesKey("temperature")
@@ -25,6 +32,11 @@ class HvacLocalDataSource(private val context: Context) : HvacDataSource {
         val IS_FRONT_DEFROSTER_ON = booleanPreferencesKey("is_front_defroster_on")
     }
 
+    /**
+     * Flow that emits the stored HVAC state.
+     * Special handling: If front defroster was previously on, it ensures temperature and fan speed
+     * are returned as maxed out according to the business rules.
+     */
     override val hvacState: Flow<HvacEntity> = context.dataStore.data.map { preferences ->
         val isDefrosterOn = preferences[PreferencesKeys.IS_FRONT_DEFROSTER_ON] ?: false
         HvacEntity(
@@ -35,12 +47,21 @@ class HvacLocalDataSource(private val context: Context) : HvacDataSource {
         )
     }
 
+    /**
+     * Updates the persistent storage with a new HVAC state.
+     * Special handling: Avoids overwriting temperature and fan speed if the change was 
+     * triggered solely by the defroster, preserving the user's previous manual settings.
+     *
+     * @param newState The new state to persist.
+     */
     override suspend fun updateState(newState: HvacEntity) {
         context.dataStore.edit { preferences ->
             val wasDefrosting = preferences[PreferencesKeys.IS_FRONT_DEFROSTER_ON] ?: false
 
             preferences[PreferencesKeys.IS_POWER_ON] = newState.isPowerOn
 
+            // Only update stored temp/fan if we are NOT in a defrosting state,
+            // or if we are just starting/stopping defrosting (to avoid saving the 'HI' override as the base temp).
             if (!wasDefrosting && !newState.isFrontDefrosterOn) {
                 preferences[PreferencesKeys.TEMPERATURE] = newState.temperature
                 preferences[PreferencesKeys.FAN_SPEED] = newState.fanSpeed

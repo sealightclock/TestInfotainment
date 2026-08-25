@@ -10,18 +10,29 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 /**
- * Simulates Platform/VHAL data source.
- * Handles updates immediately but simulates a delayed feedback loop.
+ * Simulates the Vehicle Hardware Abstraction Layer (VHAL) or Platform data source.
+ * In a real automotive app, this would interface with the car's hardware properties.
+ * Here, it simulates the delayed nature of hardware updates.
  */
 class HvacPlatformDataSource : HvacDataSource {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val _hvacState = MutableStateFlow(HvacEntity())
+    
+    /**
+     * Observable flow of the platform's current HVAC state.
+     */
     override val hvacState: Flow<HvacEntity> = _hvacState
 
+    /**
+     * Simulates sending a command to the vehicle hardware.
+     * Special handling: Waits for 1 second to simulate hardware processing time before 
+     * reflecting the change back in the state flow.
+     *
+     * @param newState The target HVAC state to apply.
+     */
     override suspend fun updateState(newState: HvacEntity) {
-        // [1] Received immediately. 
-        // [2] Simulated platform logic: waits for 1 second, then sends the value back.
-        // We launch in a separate scope so we don't block the caller (Repository/UseCase).
+        // We launch in a separate scope so we don't block the caller (Repository/UseCase),
+        // simulating an asynchronous hardware command.
         scope.launch {
             delay(1000)
             _hvacState.value = newState

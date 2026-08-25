@@ -33,12 +33,23 @@ import com.example.jonathan.testinfotainment.hvac.presentation.HvacViewModel
 
 private const val TAG = "TIF: MainScreen"
 
+/**
+ * Defines the available top-level screens in the application.
+ *
+ * @property label The display name of the screen.
+ * @property icon The icon associated with the screen.
+ */
 enum class Screen(val label: String, val icon: ImageVector) {
     Home("Home", Icons.Default.Home),
     HVAC("HVAC", Icons.Default.Thermostat),
     Settings("Settings", Icons.Default.Settings)
 }
 
+/**
+ * The root Composable for the application's UI, featuring a side navigation bar and a content area.
+ *
+ * @param appContainer The dependency injection container for providing view models.
+ */
 @Composable
 fun MainScreen(
     appContainer: AppContainer = (androidx.compose.ui.platform.LocalContext.current.applicationContext as TestInfotainmentApp).container
@@ -52,6 +63,7 @@ fun MainScreen(
     var currentScreen by remember { mutableStateOf(Screen.Home) }
 
     Row(modifier = Modifier.fillMaxSize()) {
+        // Navigation side rail
         Column(
             modifier = Modifier
                 .fillMaxHeight()
@@ -83,6 +95,12 @@ fun MainScreen(
     }
 }
 
+/**
+ * Renders the content of the currently selected screen.
+ *
+ * @param screen The active screen to display.
+ * @param hvacViewModel The shared HVAC view model.
+ */
 @Composable
 fun ScreenContent(screen: Screen, hvacViewModel: HvacViewModel) {
     when (screen) {

@@ -33,6 +33,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.jonathan.testinfotainment.common.Constants
 
+/**
+ * The main UI screen for HVAC controls.
+ * Displays power, temperature, fan speed, and defroster controls.
+ *
+ * @param viewModel The ViewModel providing the HVAC state and handling user intents.
+ */
 @Composable
 fun HvacScreen(viewModel: HvacViewModel) {
     val state by viewModel.state.collectAsState()
@@ -44,7 +50,7 @@ fun HvacScreen(viewModel: HvacViewModel) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceEvenly
     ) {
-        // Power Button
+        // Power Button: Toggles the entire HVAC system on or off.
         HvacControlButton(
             icon = Icons.Default.PowerSettingsNew,
             isSelected = state.isPowerOn,
@@ -54,7 +60,7 @@ fun HvacScreen(viewModel: HvacViewModel) {
             enabled = state.isPowerButtonEnabled
         )
 
-        // Temperature Control
+        // Temperature Control: Disabled when power is off or front defroster is active.
         HvacValueControl(
             icon = Icons.Default.DeviceThermostat,
             value = when (state.temperature) {
@@ -67,7 +73,7 @@ fun HvacScreen(viewModel: HvacViewModel) {
             onDecrease = { viewModel.onIntent(HvacIntent.DecreaseTemperature) }
         )
 
-        // Fan Speed Control
+        // Fan Speed Control: Disabled when power is off or front defroster is active.
         HvacValueControl(
             icon = Icons.Default.Air,
             value = state.fanSpeed.toString(),
@@ -76,7 +82,7 @@ fun HvacScreen(viewModel: HvacViewModel) {
             onDecrease = { viewModel.onIntent(HvacIntent.DecreaseFanSpeed) }
         )
 
-        // Front Defroster
+        // Front Defroster: Toggles the defroster mode. Forces max temp and fan speed when active.
         HvacControlButton(
             icon = Icons.Default.WindPower,
             isSelected = state.isFrontDefrosterOn,
@@ -87,6 +93,16 @@ fun HvacScreen(viewModel: HvacViewModel) {
     }
 }
 
+/**
+ * A reusable button for HVAC mode controls (Power, Defroster).
+ *
+ * @param icon The icon to display.
+ * @param isSelected True if the mode is currently active.
+ * @param onClick Callback for button click.
+ * @param label The text label to display below the icon.
+ * @param enabled True if the button should be interactive.
+ * @param isPrimaryAction True if this button represents a major action like Power.
+ */
 @Composable
 fun HvacControlButton(
     icon: ImageVector,
@@ -119,6 +135,15 @@ fun HvacControlButton(
     }
 }
 
+/**
+ * A reusable control for adjusting numeric or textual values with increase/decrease buttons.
+ *
+ * @param icon The representative icon for the control.
+ * @param value The current value to display.
+ * @param enabled True if the control should be interactive.
+ * @param onIncrease Callback for increasing the value.
+ * @param onDecrease Callback for decreasing the value.
+ */
 @Composable
 fun HvacValueControl(
     icon: ImageVector,
