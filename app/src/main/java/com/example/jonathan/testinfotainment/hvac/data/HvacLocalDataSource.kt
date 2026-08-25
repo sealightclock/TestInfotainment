@@ -1,7 +1,6 @@
 package com.example.jonathan.testinfotainment.hvac.data
 
 import android.content.Context
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -14,8 +13,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.IOException
-
-private const val TAG = "TIF: HvacLocalDataSource"
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "hvac_settings")
 
@@ -71,36 +68,6 @@ class HvacLocalDataSource(private val context: Context) : HvacDataSource {
             }
 
             preferences[PreferencesKeys.IS_FRONT_DEFROSTER_ON] = newState.isFrontDefrosterOn
-        }
-    }
-
-    suspend fun setInt(key: Preferences.Key<Int>, value: Int) {
-        context.dataStore.edit { preferences ->
-            preferences[key] = value
-        }
-    }
-
-    suspend fun getInt(key: Preferences.Key<Int>, defaultValue: Int): Int {
-        return try {
-            context.dataStore.data.first()[key] ?: defaultValue
-        } catch (e: IOException) {
-            Log.e(TAG, "getInt: IOException: use defaultValue=[$defaultValue] !!\n${e.stackTraceToString()}")
-            defaultValue
-        }
-    }
-
-    suspend fun setBoolean(key: Preferences.Key<Boolean>, value: Boolean) {
-        context.dataStore.edit { preferences ->
-            preferences[key] = value
-        }
-    }
-
-    suspend fun getBoolean(key: Preferences.Key<Boolean>, defaultValue: Boolean): Boolean {
-        return try {
-            context.dataStore.data.first()[key] ?: defaultValue
-        } catch (e: IOException) {
-            Log.e(TAG, "getBoolean: IOException: use defaultValue=[$defaultValue] !!\n${e.stackTraceToString()}")
-            defaultValue
         }
     }
 }
