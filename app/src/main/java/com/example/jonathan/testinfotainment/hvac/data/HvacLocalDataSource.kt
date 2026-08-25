@@ -1,6 +1,7 @@
 package com.example.jonathan.testinfotainment.hvac.data
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -13,6 +14,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.IOException
+
+private const val TAG = "TIF: HvacLocalDataSource"
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "hvac_settings")
 
@@ -81,6 +84,7 @@ class HvacLocalDataSource(private val context: Context) : HvacDataSource {
         return try {
             context.dataStore.data.first()[key] ?: defaultValue
         } catch (e: IOException) {
+            Log.e(TAG, "getInt: IOException: use defaultValue=[$defaultValue] !!\n${e.stackTraceToString()}")
             defaultValue
         }
     }
@@ -95,6 +99,7 @@ class HvacLocalDataSource(private val context: Context) : HvacDataSource {
         return try {
             context.dataStore.data.first()[key] ?: defaultValue
         } catch (e: IOException) {
+            Log.e(TAG, "getBoolean: IOException: use defaultValue=[$defaultValue] !!\n${e.stackTraceToString()}")
             defaultValue
         }
     }

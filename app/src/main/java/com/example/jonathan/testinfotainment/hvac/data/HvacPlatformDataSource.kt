@@ -1,5 +1,6 @@
 package com.example.jonathan.testinfotainment.hvac.data
 
+import com.example.jonathan.testinfotainment.common.Constants.DELAY_DATA_BACKEND_TO_PLATFORM
 import com.example.jonathan.testinfotainment.hvac.domain.HvacEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,7 +35,7 @@ class HvacPlatformDataSource : HvacDataSource {
         // We launch in a separate scope so we don't block the caller (Repository/UseCase),
         // simulating an asynchronous hardware command.
         scope.launch {
-            delay(1000)
+            delay(DELAY_DATA_BACKEND_TO_PLATFORM)
             _hvacState.value = newState
         }
     }

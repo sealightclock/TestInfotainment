@@ -2,6 +2,9 @@ package com.example.jonathan.testinfotainment.hvac.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.jonathan.testinfotainment.common.Constants.DELAY_DATA_PLATFORM_TO_VIEWMODEL_TO_INTENT
+import com.example.jonathan.testinfotainment.common.Constants.DELAY_VIEW_DISABLED_TO_ENABLED
+import com.example.jonathan.testinfotainment.common.Constants.DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM
 import com.example.jonathan.testinfotainment.hvac.domain.HvacEntity
 import com.example.jonathan.testinfotainment.hvac.domain.HvacUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,9 +28,10 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
 
     // Local source of truth for immediate UI updates and tracking recent user changes.
     private var currentEntity = HvacEntity()
+
+    private var lastPowerUpdateTimestamp: Long = 0
     private var lastTemperatureUpdateTimestamp: Long = 0
     private var lastFanSpeedUpdateTimestamp: Long = 0
-    private var lastPowerUpdateTimestamp: Long = 0
     private var lastFrontDefrosterUpdateTimestamp: Long = 0
 
     init {
@@ -38,7 +42,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
             useCase.getHvacState().collectLatest { entity ->
                 // [3] Presentation layer waits for 1 second after receiving value from Platform
                 // to avoid immediate flickering if multiple updates arrive.
-                delay(1000)
+                delay(DELAY_DATA_PLATFORM_TO_VIEWMODEL_TO_INTENT)
                 onIntent(HvacIntent.RefreshFromPlatform(entity))
             }
         }
@@ -61,7 +65,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                     // Disable the button temporarily to prevent rapid multi-taps.
                     _state.update { it.copy(isPowerButtonEnabled = false) }
                     viewModelScope.launch {
-                        delay(2000)
+                        delay(DELAY_VIEW_DISABLED_TO_ENABLED)
                         _state.update { it.copy(isPowerButtonEnabled = true) }
                     }
                     
@@ -109,7 +113,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                     // Disable button temporarily to prevent spamming.
                     _state.update { it.copy(isFrontDefrosterButtonEnabled = false) }
                     viewModelScope.launch {
-                        delay(2000)
+                        delay(DELAY_VIEW_DISABLED_TO_ENABLED)
                         _state.update { it.copy(isFrontDefrosterButtonEnabled = true) }
                     }
                     
@@ -124,25 +128,26 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                     // Cooldown logic: Reject Platform values if the user modified them recently (within 2s threshold).
                     // This prevents "jumping" sliders or values when the platform hasn't yet processed the user's change.
                     
-                    val mergedPower = if (currentTime - lastPowerUpdateTimestamp < 2000) {
+                    val mergedPower = if (currentTime - lastPowerUpdateTimestamp <
+                        DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
                         currentEntity.isPowerOn
                     } else {
                         platformEntity.isPowerOn
                     }
 
-                    val mergedTemperature = if (currentTime - lastTemperatureUpdateTimestamp < 2000) {
+                    val mergedTemperature = if (currentTime - lastTemperatureUpdateTimestamp < DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
                         currentEntity.temperature
                     } else {
                         platformEntity.temperature
                     }
 
-                    val mergedFanSpeed = if (currentTime - lastFanSpeedUpdateTimestamp < 2000) {
+                    val mergedFanSpeed = if (currentTime - lastFanSpeedUpdateTimestamp < DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
                         currentEntity.fanSpeed
                     } else {
                         platformEntity.fanSpeed
                     }
 
-                    val mergedFrontDefroster = if (currentTime - lastFrontDefrosterUpdateTimestamp < 2000) {
+                    val mergedFrontDefroster = if (currentTime - lastFrontDefrosterUpdateTimestamp < DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
                         currentEntity.isFrontDefrosterOn
                     } else {
                         platformEntity.isFrontDefrosterOn

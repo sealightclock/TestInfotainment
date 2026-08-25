@@ -9,5 +9,6 @@ sealed class HvacIntent {
     object IncreaseFanSpeed : HvacIntent()
     object DecreaseFanSpeed : HvacIntent()
     object ToggleFrontDefroster : HvacIntent()
+
     data class RefreshFromPlatform(val entity: HvacEntity) : HvacIntent()
 }
