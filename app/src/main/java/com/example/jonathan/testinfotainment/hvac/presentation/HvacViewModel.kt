@@ -43,7 +43,13 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                 // [3] Presentation layer waits for 1 second after receiving value from Platform
                 // to avoid immediate flickering if multiple updates arrive.
                 delay(DELAY_DATA_PLATFORM_TO_VIEWMODEL_TO_INTENT)
-                onIntent(HvacIntent.RefreshFromPlatform(entity))
+
+                // Divide the platform update into granular intents for better efficiency.
+                // This ensures we only process properties that might have changed.
+                onIntent(HvacIntent.RefreshPower(entity.isPowerOn))
+                onIntent(HvacIntent.RefreshTemperature(entity.temperature))
+                onIntent(HvacIntent.RefreshFanSpeed(entity.fanSpeed))
+                onIntent(HvacIntent.RefreshFrontDefroster(entity.isFrontDefrosterOn))
             }
         }
     }
@@ -133,47 +139,39 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                     useCase.toggleFrontDefroster(entityBeforeChange)
                 }
 
-                // Platform Intent to refresh the UI:
-                is HvacIntent.RefreshFromPlatform -> {
+                // Platform Intents to refresh specific properties:
+                // Cooldown logic: Reject Platform values if the user modified them recently (within 2s threshold).
+                // This prevents "jumping" sliders or values when the platform hasn't yet processed the user's change.
+
+                is HvacIntent.RefreshPower -> {
                     val currentTime = System.currentTimeMillis()
-                    val platformEntity = intent.entity
-                    
-                    // Cooldown logic: Reject Platform values if the user modified them recently (within 2s threshold).
-                    // This prevents "jumping" sliders or values when the platform hasn't yet processed the user's change.
-                    
-                    val mergedPower = if (currentTime - lastPowerUpdateTimestamp <
-                        DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
-                        currentEntity.isPowerOn
-                    } else {
-                        platformEntity.isPowerOn
+                    if (currentTime - lastPowerUpdateTimestamp >= DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
+                        updateUi(currentEntity.copy(isPowerOn = intent.isPowerOn))
                     }
+                    null
+                }
 
-                    val mergedTemperature = if (currentTime - lastTemperatureUpdateTimestamp < DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
-                        currentEntity.temperature
-                    } else {
-                        platformEntity.temperature
+                is HvacIntent.RefreshTemperature -> {
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - lastTemperatureUpdateTimestamp >= DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
+                        updateUi(currentEntity.copy(temperature = intent.temperature))
                     }
+                    null
+                }
 
-                    val mergedFanSpeed = if (currentTime - lastFanSpeedUpdateTimestamp < DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
-                        currentEntity.fanSpeed
-                    } else {
-                        platformEntity.fanSpeed
+                is HvacIntent.RefreshFanSpeed -> {
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - lastFanSpeedUpdateTimestamp >= DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
+                        updateUi(currentEntity.copy(fanSpeed = intent.fanSpeed))
                     }
+                    null
+                }
 
-                    val mergedFrontDefroster = if (currentTime - lastFrontDefrosterUpdateTimestamp < DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
-                        currentEntity.isFrontDefrosterOn
-                    } else {
-                        platformEntity.isFrontDefrosterOn
+                is HvacIntent.RefreshFrontDefroster -> {
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - lastFrontDefrosterUpdateTimestamp >= DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
+                        updateUi(currentEntity.copy(isFrontDefrosterOn = intent.isFrontDefrosterOn))
                     }
-                    
-                    val mergedEntity = platformEntity.copy(
-                        isPowerOn = mergedPower,
-                        temperature = mergedTemperature,
-                        fanSpeed = mergedFanSpeed,
-                        isFrontDefrosterOn = mergedFrontDefroster
-                    )
-                    
-                    updateUi(mergedEntity)
                     null
                 }
             }

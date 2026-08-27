@@ -1,7 +1,5 @@
 package com.example.jonathan.testinfotainment.hvac.presentation
 
-import com.example.jonathan.testinfotainment.hvac.domain.HvacEntity
-
 /**
  * List of supported Intents (or events)
  */
@@ -21,7 +19,10 @@ sealed class HvacIntent {
     object ToggleFrontDefroster : HvacIntent()
 
     // Platform Intents:
-    data class RefreshFromPlatform(val entity: HvacEntity) : HvacIntent()
+    data class RefreshPower(val isPowerOn: Boolean) : HvacIntent()
+    data class RefreshTemperature(val temperature: Int) : HvacIntent()
+    data class RefreshFanSpeed(val fanSpeed: Int) : HvacIntent()
+    data class RefreshFrontDefroster(val isFrontDefrosterOn: Boolean) : HvacIntent()
 
     // Timer Intents are implemented as delays. Refer to "Constants" for more details.
 }
