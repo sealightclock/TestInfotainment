@@ -29,6 +29,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
     // Local source of truth for immediate UI updates and tracking recent user changes.
     private var currentEntity = HvacEntity()
 
+    // These are for the purpose of ignoring Platform data if they arrive too  while the user is still interacting:
     private var lastPowerUpdateTimestamp: Long = 0
     private var lastTemperatureUpdateTimestamp: Long = 0
     private var lastFanSpeedUpdateTimestamp: Long = 0
@@ -63,6 +64,10 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
      */
     fun onIntent(intent: HvacIntent) {
         viewModelScope.launch {
+            // In the "when" block:
+            //   [1] do not use keyword "is" if there is no argument list, for efficiency.
+            //   [2] use keyword "is" if there is argument list, for type matching and smart
+            //   casting.
             val nextEntity: HvacEntity? = when (intent) {
                 // User Intent to toggle Power:
                 HvacIntent.TogglePower -> {
