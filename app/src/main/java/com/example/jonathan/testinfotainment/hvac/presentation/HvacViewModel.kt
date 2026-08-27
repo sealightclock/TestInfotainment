@@ -58,6 +58,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
     fun onIntent(intent: HvacIntent) {
         viewModelScope.launch {
             val nextEntity: HvacEntity? = when (intent) {
+                // User Intent to toggle Power:
                 HvacIntent.TogglePower -> {
                     val entityBeforeChange = currentEntity
                     lastPowerUpdateTimestamp = System.currentTimeMillis()
@@ -73,6 +74,8 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                     updateUi(entityBeforeChange.copy(isPowerOn = !entityBeforeChange.isPowerOn))
                     useCase.togglePower(entityBeforeChange)
                 }
+
+                // User Intent to increase Temperature:
                 HvacIntent.IncreaseTemperature -> {
                     // Temperature cannot be adjusted if front defroster is on (it's maxed).
                     if (!currentEntity.isFrontDefrosterOn) {
@@ -80,6 +83,8 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                         useCase.adjustTemperature(currentEntity, 1)
                     } else null
                 }
+
+                // User Intent to decrease Temperature:
                 HvacIntent.DecreaseTemperature -> {
                     // Temperature cannot be adjusted if front defroster is on (it's maxed).
                     if (!currentEntity.isFrontDefrosterOn) {
@@ -87,6 +92,8 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                         useCase.adjustTemperature(currentEntity, -1)
                     } else null
                 }
+
+                // User Intent to increase Fan Speed:
                 HvacIntent.IncreaseFanSpeed -> {
                     // Fan speed cannot be adjusted if front defroster is on (it's maxed).
                     if (!currentEntity.isFrontDefrosterOn) {
@@ -94,6 +101,8 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                         useCase.adjustFanSpeed(currentEntity, 1)
                     } else null
                 }
+
+                // User Intent to decrease Fan Speed:
                 HvacIntent.DecreaseFanSpeed -> {
                     // Fan speed cannot be adjusted if front defroster is on (it's maxed).
                     if (!currentEntity.isFrontDefrosterOn) {
@@ -101,6 +110,8 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                         useCase.adjustFanSpeed(currentEntity, -1)
                     } else null
                 }
+
+                // User Intent to toggle Front Defroster:
                 HvacIntent.ToggleFrontDefroster -> {
                     val entityBeforeChange = currentEntity
                     val currentTime = System.currentTimeMillis()
@@ -121,6 +132,8 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                     updateUi(entityBeforeChange.copy(isFrontDefrosterOn = !entityBeforeChange.isFrontDefrosterOn))
                     useCase.toggleFrontDefroster(entityBeforeChange)
                 }
+
+                // Platform Intent to refresh the UI:
                 is HvacIntent.RefreshFromPlatform -> {
                     val currentTime = System.currentTimeMillis()
                     val platformEntity = intent.entity

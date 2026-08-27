@@ -11,19 +11,14 @@ import com.example.jonathan.testinfotainment.hvac.domain.HvacEntity
  * @property isFrontDefrosterButtonEnabled Whether the front defroster button is currently interactive.
  */
 data class HvacState(
-    val hvac: HvacEntity = HvacEntity(),
-    val isPowerButtonEnabled: Boolean = true,
-    val isFrontDefrosterButtonEnabled: Boolean = true
+    val hvac: HvacEntity = HvacEntity(), // HVAC feature state
+    val isPowerButtonEnabled: Boolean = true, // HVAC Power button accessibility state
+    val isFrontDefrosterButtonEnabled: Boolean = true // HVAC Front Defroster accessibility state
 ) {
     /**
      * Helper to check if the HVAC power is on.
      */
     val isPowerOn get() = hvac.isPowerOn
-
-    /**
-     * Helper to check if the front defroster is on.
-     */
-    val isFrontDefrosterOn get() = hvac.isFrontDefrosterOn
 
     /**
      * The effective temperature to display.
@@ -38,4 +33,9 @@ data class HvacState(
      */
     val fanSpeed: Int
         get() = if (hvac.isFrontDefrosterOn) Constants.FAN_SPEED_MAX else hvac.fanSpeed
+
+    /**
+     * Helper to check if the front defroster is on.
+     */
+    val isFrontDefrosterOn get() = hvac.isFrontDefrosterOn
 }
