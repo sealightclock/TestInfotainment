@@ -6,7 +6,11 @@ import com.example.jonathan.testinfotainment.common.Constants.DELAY_DATA_PLATFOR
 import com.example.jonathan.testinfotainment.common.Constants.DELAY_VIEW_DISABLED_TO_ENABLED
 import com.example.jonathan.testinfotainment.common.Constants.DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM
 import com.example.jonathan.testinfotainment.hvac.domain.HvacEntity
-import com.example.jonathan.testinfotainment.hvac.domain.HvacUseCase
+import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacGetStateUseCase
+import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacUserAdjustFanSpeedUseCase
+import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacUserAdjustTemperatureUseCase
+import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacUserToggleFrontDefrosterUseCase
+import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacUserTogglePowerUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,10 +22,14 @@ import kotlinx.coroutines.delay
 /**
  * ViewModel for the HVAC screen, managing state and user interactions.
  * Handles optimistic updates and merging data from the platform with a cooldown period.
- *
- * @property useCase The business logic provider for HVAC operations.
  */
-class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
+class HvacViewModel(
+    private val hvacGetStateUseCase: HvacGetStateUseCase,
+    private val hvacUserTogglePowerUseCase: HvacUserTogglePowerUseCase,
+    private val hvacUserAdjustTemperatureUseCase: HvacUserAdjustTemperatureUseCase,
+    private val hvacUserAdjustFanSpeedUseCase: HvacUserAdjustFanSpeedUseCase,
+    private val hvacUserToggleFrontDefrosterUseCase: HvacUserToggleFrontDefrosterUseCase,
+) : ViewModel() {
 
     private val _state = MutableStateFlow(HvacState())
     val state: StateFlow<HvacState> = _state.asStateFlow()
@@ -40,7 +48,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
             // Observe HVAC state changes from the platform.
             // Use collectLatest to skip intermediate platform updates if they arrive rapidly.
             // This satisfies the 1s wait requirement while avoiding a backlog of stale updates.
-            useCase.getHvacState().collectLatest { entity ->
+            hvacGetStateUseCase().collectLatest { entity ->
                 // [3] Presentation layer waits for 1 second after receiving value from Platform
                 // to avoid immediate flickering if multiple updates arrive.
                 delay(DELAY_DATA_PLATFORM_TO_VIEWMODEL_TO_INTENT)
@@ -83,7 +91,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                     
                     // Optimistic update: Update UI immediately before waiting for platform confirmation.
                     updateUi(entityBeforeChange.copy(isPowerOn = !entityBeforeChange.isPowerOn))
-                    useCase.togglePower(entityBeforeChange)
+                    hvacUserTogglePowerUseCase(entityBeforeChange)
                 }
 
                 // User Intent to increase Temperature:
@@ -91,7 +99,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                     // Temperature cannot be adjusted if front defroster is on (it's maxed).
                     if (!currentEntity.isFrontDefrosterOn) {
                         lastTemperatureUpdateTimestamp = System.currentTimeMillis()
-                        useCase.adjustTemperature(currentEntity, 1)
+                        hvacUserAdjustTemperatureUseCase(currentEntity, 1)
                     } else null
                 }
 
@@ -100,7 +108,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                     // Temperature cannot be adjusted if front defroster is on (it's maxed).
                     if (!currentEntity.isFrontDefrosterOn) {
                         lastTemperatureUpdateTimestamp = System.currentTimeMillis()
-                        useCase.adjustTemperature(currentEntity, -1)
+                        hvacUserAdjustTemperatureUseCase(currentEntity, -1)
                     } else null
                 }
 
@@ -109,7 +117,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                     // Fan speed cannot be adjusted if front defroster is on (it's maxed).
                     if (!currentEntity.isFrontDefrosterOn) {
                         lastFanSpeedUpdateTimestamp = System.currentTimeMillis()
-                        useCase.adjustFanSpeed(currentEntity, 1)
+                        hvacUserAdjustFanSpeedUseCase(currentEntity, 1)
                     } else null
                 }
 
@@ -118,7 +126,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                     // Fan speed cannot be adjusted if front defroster is on (it's maxed).
                     if (!currentEntity.isFrontDefrosterOn) {
                         lastFanSpeedUpdateTimestamp = System.currentTimeMillis()
-                        useCase.adjustFanSpeed(currentEntity, -1)
+                        hvacUserAdjustFanSpeedUseCase(currentEntity, -1)
                     } else null
                 }
 
@@ -141,7 +149,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                     
                     // Optimistic update - just toggle the boolean, HvacState handles the value overrides.
                     updateUi(entityBeforeChange.copy(isFrontDefrosterOn = !entityBeforeChange.isFrontDefrosterOn))
-                    useCase.toggleFrontDefroster(entityBeforeChange)
+                    hvacUserToggleFrontDefrosterUseCase(entityBeforeChange)
                 }
 
                 // Platform Intents to refresh specific properties:

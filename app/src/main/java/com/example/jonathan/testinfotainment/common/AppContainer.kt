@@ -5,7 +5,11 @@ import com.example.jonathan.testinfotainment.hvac.data.HvacLocalDataSource
 import com.example.jonathan.testinfotainment.hvac.data.HvacPlatformDataSource
 import com.example.jonathan.testinfotainment.hvac.data.HvacRepositoryImpl
 import com.example.jonathan.testinfotainment.hvac.domain.HvacRepository
-import com.example.jonathan.testinfotainment.hvac.domain.HvacUseCase
+import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacGetStateUseCase
+import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacUserAdjustFanSpeedUseCase
+import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacUserAdjustTemperatureUseCase
+import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacUserToggleFrontDefrosterUseCase
+import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacUserTogglePowerUseCase
 
 /**
  * Dependency Container for the application.
@@ -17,9 +21,13 @@ import com.example.jonathan.testinfotainment.hvac.domain.HvacUseCase
  */
 interface AppContainer {
     /**
-     * Provides the singleton instance of the HVAC UseCase.
+     * Use cases for HVAC operations.
      */
-    val hvacUseCase: HvacUseCase
+    val hvacGetStateUseCase: HvacGetStateUseCase
+    val hvacUserTogglePowerUseCase: HvacUserTogglePowerUseCase
+    val hvacUserAdjustTemperatureUseCase: HvacUserAdjustTemperatureUseCase
+    val hvacUserAdjustFanSpeedUseCase: HvacUserAdjustFanSpeedUseCase
+    val hvacUserToggleFrontDefrosterUseCase: HvacUserToggleFrontDefrosterUseCase
 }
 
 /**
@@ -51,7 +59,23 @@ class AppContainerImpl(private val context: Context) : AppContainer {
         HvacRepositoryImpl(hvacLocalDataSource, hvacPlatformDataSource)
     }
 
-    override val hvacUseCase: HvacUseCase by lazy {
-        HvacUseCase(hvacRepository)
+    override val hvacGetStateUseCase: HvacGetStateUseCase by lazy {
+        HvacGetStateUseCase(hvacRepository)
+    }
+
+    override val hvacUserTogglePowerUseCase: HvacUserTogglePowerUseCase by lazy {
+        HvacUserTogglePowerUseCase(hvacRepository)
+    }
+
+    override val hvacUserAdjustTemperatureUseCase: HvacUserAdjustTemperatureUseCase by lazy {
+        HvacUserAdjustTemperatureUseCase(hvacRepository)
+    }
+
+    override val hvacUserAdjustFanSpeedUseCase: HvacUserAdjustFanSpeedUseCase by lazy {
+        HvacUserAdjustFanSpeedUseCase(hvacRepository)
+    }
+
+    override val hvacUserToggleFrontDefrosterUseCase: HvacUserToggleFrontDefrosterUseCase by lazy {
+        HvacUserToggleFrontDefrosterUseCase(hvacRepository)
     }
 }

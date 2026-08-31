@@ -21,7 +21,13 @@ class ViewModelFactory(private val appContainer: AppContainer) : ViewModelProvid
         return when {
             modelClass.isAssignableFrom(HvacViewModel::class.java) -> {
                 @Suppress("UNCHECKED_CAST")
-                HvacViewModel(appContainer.hvacUseCase) as T
+                HvacViewModel(
+                    appContainer.hvacGetStateUseCase,
+                    appContainer.hvacUserTogglePowerUseCase,
+                    appContainer.hvacUserAdjustTemperatureUseCase,
+                    appContainer.hvacUserAdjustFanSpeedUseCase,
+                    appContainer.hvacUserToggleFrontDefrosterUseCase,
+                ) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }
