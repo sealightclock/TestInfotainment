@@ -1,41 +1,22 @@
 package com.example.jonathan.testinfotainment.hvac.presentation
 
 import com.example.jonathan.testinfotainment.common.Constants
-import com.example.jonathan.testinfotainment.hvac.domain.HvacEntity
 
 /**
  * Represents the UI state for the HVAC (Heating, Ventilation, and Air Conditioning) system.
  *
- * @property hvac The core HVAC data entity containing current settings.
+ * @property isPowerOn True if the HVAC system is powered on.
+ * @property temperature The effective temperature to display.
+ * @property fanSpeed The effective fan speed to display.
+ * @property isFrontDefrosterOn True if the front defroster is active.
  * @property isPowerButtonEnabled Whether the power button is currently interactive.
  * @property isFrontDefrosterButtonEnabled Whether the front defroster button is currently interactive.
  */
 data class HvacState(
-    val hvac: HvacEntity = HvacEntity(), // HVAC feature state
+    val isPowerOn: Boolean = true, // HVAC system power state
+    val temperature: Int = Constants.TEMPERATURE_DEFAULT, // Effective temperature to display
+    val fanSpeed: Int = Constants.FAN_SPEED_MIN, // Effective fan speed to display
+    val isFrontDefrosterOn: Boolean = false, // Front defroster state
     val isPowerButtonEnabled: Boolean = true, // HVAC Power button accessibility state
     val isFrontDefrosterButtonEnabled: Boolean = true // HVAC Front Defroster accessibility state
-) {
-    /**
-     * Helper to check if the HVAC power is on.
-     */
-    val isPowerOn get() = hvac.isPowerOn
-
-    /**
-     * The effective temperature to display.
-     * Special handling: When front defroster is active, temperature is maxed out.
-     */
-    val temperature: Int
-        get() = if (hvac.isFrontDefrosterOn) Constants.TEMPERATURE_MAX else hvac.temperature
-
-    /**
-     * The effective fan speed to display.
-     * Special handling: When front defroster is active, fan speed is maxed out.
-     */
-    val fanSpeed: Int
-        get() = if (hvac.isFrontDefrosterOn) Constants.FAN_SPEED_MAX else hvac.fanSpeed
-
-    /**
-     * Helper to check if the front defroster is on.
-     */
-    val isFrontDefrosterOn get() = hvac.isFrontDefrosterOn
-}
+)

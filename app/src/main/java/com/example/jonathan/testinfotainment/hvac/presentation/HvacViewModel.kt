@@ -2,6 +2,7 @@ package com.example.jonathan.testinfotainment.hvac.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.jonathan.testinfotainment.common.Constants
 import com.example.jonathan.testinfotainment.common.Constants.DELAY_DATA_PLATFORM_TO_VIEWMODEL_TO_INTENT
 import com.example.jonathan.testinfotainment.common.Constants.DELAY_VIEW_DISABLED_TO_ENABLED
 import com.example.jonathan.testinfotainment.common.Constants.DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM
@@ -151,7 +152,7 @@ class HvacViewModel(
                         _state.update { it.copy(isFrontDefrosterButtonEnabled = true) }
                     }
                     
-                    // Optimistic update - just toggle the boolean, HvacState handles the value overrides.
+                    // Optimistic update - updateUi will handle the value overrides for the UI state.
                     updateUi(entityBeforeChange.copy(isFrontDefrosterOn = !entityBeforeChange.isFrontDefrosterOn))
                     hvacUserToggleFrontDefrosterUseCase(entityBeforeChange)
                 }
@@ -204,7 +205,12 @@ class HvacViewModel(
     private fun updateUi(entity: HvacEntity) {
         currentEntity = entity
         _state.update {
-            it.copy(hvac = entity)
+            it.copy(
+                isPowerOn = entity.isPowerOn,
+                temperature = if (entity.isFrontDefrosterOn) Constants.TEMPERATURE_MAX else entity.temperature,
+                fanSpeed = if (entity.isFrontDefrosterOn) Constants.FAN_SPEED_MAX else entity.fanSpeed,
+                isFrontDefrosterOn = entity.isFrontDefrosterOn
+            )
         }
     }
 }
