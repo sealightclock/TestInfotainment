@@ -22,11 +22,19 @@ class ViewModelFactory(private val appContainer: AppContainer) : ViewModelProvid
             modelClass.isAssignableFrom(HvacViewModel::class.java) -> {
                 @Suppress("UNCHECKED_CAST")
                 HvacViewModel(
-                    appContainer.hvacGetStateUseCase,
-                    appContainer.hvacUserTogglePowerUseCase,
-                    appContainer.hvacUserAdjustTemperatureUseCase,
-                    appContainer.hvacUserAdjustFanSpeedUseCase,
-                    appContainer.hvacUserToggleFrontDefrosterUseCase,
+                    hvacGetStateUseCase = appContainer.hvacGetStateUseCase,
+                    hvacUserTogglePowerUseCase = appContainer.hvacUserTogglePowerUseCase,
+                    hvacUserAdjustTemperatureUseCase = appContainer.hvacUserAdjustTemperatureUseCase,
+                    hvacUserAdjustFanSpeedUseCase = appContainer.hvacUserAdjustFanSpeedUseCase,
+                    hvacUserToggleFrontDefrosterUseCase = appContainer.hvacUserToggleFrontDefrosterUseCase,
+                    getIsPowerOnFromLocalUseCase = appContainer.getIsPowerOnFromLocalUseCase,
+                    storeIsPowerOnToLocalUseCase = appContainer.storeIsPowerOnToLocalUseCase,
+                    getTemperatureFromLocalUseCase = appContainer.getTemperatureFromLocalUseCase,
+                    storeTemperatureToLocalUseCase = appContainer.storeTemperatureToLocalUseCase,
+                    getFanSpeedFromLocalUseCase = appContainer.getFanSpeedFromLocalUseCase,
+                    storeFanSpeedToLocalUseCase = appContainer.storeFanSpeedToLocalUseCase,
+                    getIsFrontDefrosterOnFromLocalUseCase = appContainer.getIsFrontDefrosterOnFromLocalUseCase,
+                    storeIsFrontDefrosterOnToLocalUseCase = appContainer.storeIsFrontDefrosterOnToLocalUseCase,
                 ) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")

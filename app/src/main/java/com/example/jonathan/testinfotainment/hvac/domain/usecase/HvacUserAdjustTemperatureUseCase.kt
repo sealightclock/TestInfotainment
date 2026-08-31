@@ -8,8 +8,12 @@ import com.example.jonathan.testinfotainment.hvac.domain.HvacRepository
  * Use case for adjusting the temperature by a given delta.
  *
  * @property repository The HVAC repository for data access.
+ * @property storeTemperatureToLocalUseCase Use case to persist the temperature.
  */
-class HvacUserAdjustTemperatureUseCase(private val repository: HvacRepository) {
+class HvacUserAdjustTemperatureUseCase(
+    private val repository: HvacRepository,
+    private val storeTemperatureToLocalUseCase: HvacStoreTemperatureToLocalUseCase
+) {
     /**
      * Adjusts the temperature by a given delta.
      * Special handling: If power is off, no adjustment is made.
@@ -22,7 +26,8 @@ class HvacUserAdjustTemperatureUseCase(private val repository: HvacRepository) {
         if (!currentState.isPowerOn) return currentState
         val newTemp = (currentState.temperature + delta).coerceIn(Constants.TEMPERATURE_MIN, Constants.TEMPERATURE_MAX)
         val newState = currentState.copy(temperature = newTemp)
-        repository.updateHvacState(newState)
+        repository.updatePlatformHvacState(newState)
+        storeTemperatureToLocalUseCase(newTemp)
         return newState
     }
 }

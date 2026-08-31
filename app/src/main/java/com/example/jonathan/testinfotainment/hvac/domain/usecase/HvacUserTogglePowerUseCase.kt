@@ -7,8 +7,12 @@ import com.example.jonathan.testinfotainment.hvac.domain.HvacRepository
  * Use case for toggling the main power state of the HVAC system.
  *
  * @property repository The HVAC repository for data access.
+ * @property storeIsPowerOnToLocalUseCase Use case to persist the power state.
  */
-class HvacUserTogglePowerUseCase(private val repository: HvacRepository) {
+class HvacUserTogglePowerUseCase(
+    private val repository: HvacRepository,
+    private val storeIsPowerOnToLocalUseCase: HvacStoreIsPowerOnToLocalUseCase
+) {
     /**
      * Toggles the main power state of the HVAC system.
      *
@@ -17,7 +21,8 @@ class HvacUserTogglePowerUseCase(private val repository: HvacRepository) {
      */
     suspend operator fun invoke(currentState: HvacEntity): HvacEntity {
         val newState = currentState.copy(isPowerOn = !currentState.isPowerOn)
-        repository.updateHvacState(newState)
+        repository.updatePlatformHvacState(newState)
+        storeIsPowerOnToLocalUseCase(newState.isPowerOn)
         return newState
     }
 }

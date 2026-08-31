@@ -7,8 +7,12 @@ import com.example.jonathan.testinfotainment.hvac.domain.HvacRepository
  * Use case for toggling the front defroster state.
  *
  * @property repository The HVAC repository for data access.
+ * @property storeIsFrontDefrosterOnToLocalUseCase Use case to persist the defroster state.
  */
-class HvacUserToggleFrontDefrosterUseCase(private val repository: HvacRepository) {
+class HvacUserToggleFrontDefrosterUseCase(
+    private val repository: HvacRepository,
+    private val storeIsFrontDefrosterOnToLocalUseCase: HvacStoreIsFrontDefrosterOnToLocalUseCase
+) {
     /**
      * Toggles the front defroster state.
      * Special handling: If power is off, no adjustment is made.
@@ -19,7 +23,8 @@ class HvacUserToggleFrontDefrosterUseCase(private val repository: HvacRepository
     suspend operator fun invoke(currentState: HvacEntity): HvacEntity {
         if (!currentState.isPowerOn) return currentState
         val newState = currentState.copy(isFrontDefrosterOn = !currentState.isFrontDefrosterOn)
-        repository.updateHvacState(newState)
+        repository.updatePlatformHvacState(newState)
+        storeIsFrontDefrosterOnToLocalUseCase(newState.isFrontDefrosterOn)
         return newState
     }
 }

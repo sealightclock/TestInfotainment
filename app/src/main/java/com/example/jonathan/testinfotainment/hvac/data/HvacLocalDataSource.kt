@@ -56,4 +56,40 @@ class HvacLocalDataSource(private val context: Context) : HvacDataSource {
             preferences[HvacLocalDto.IS_FRONT_DEFROSTER_ON] = newState.isFrontDefrosterOn
         }
     }
+
+    /**
+     * Updates only the Power state in local storage.
+     */
+    suspend fun updateIsPowerOn(isPowerOn: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[HvacLocalDto.IS_POWER_ON] = isPowerOn
+        }
+    }
+
+    /**
+     * Updates only the Temperature state in local storage.
+     */
+    suspend fun updateTemperature(temperature: Int) {
+        context.dataStore.edit { preferences ->
+            preferences[HvacLocalDto.TEMPERATURE] = temperature
+        }
+    }
+
+    /**
+     * Updates only the Fan Speed state in local storage.
+     */
+    suspend fun updateFanSpeed(fanSpeed: Int) {
+        context.dataStore.edit { preferences ->
+            preferences[HvacLocalDto.FAN_SPEED] = fanSpeed
+        }
+    }
+
+    /**
+     * Updates only the Front Defroster state in local storage.
+     */
+    suspend fun updateIsFrontDefrosterOn(isOn: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[HvacLocalDto.IS_FRONT_DEFROSTER_ON] = isOn
+        }
+    }
 }

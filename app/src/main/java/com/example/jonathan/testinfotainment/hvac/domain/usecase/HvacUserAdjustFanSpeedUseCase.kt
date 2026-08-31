@@ -8,8 +8,14 @@ import com.example.jonathan.testinfotainment.hvac.domain.HvacRepository
  * Use case for adjusting the fan speed by a given delta.
  *
  * @property repository The HVAC repository for data access.
+ * @property storeFanSpeedToLocalUseCase Use case to persist the fan speed.
+ * @property storeIsPowerOnToLocalUseCase Use case to persist power state (for auto-off).
  */
-class HvacUserAdjustFanSpeedUseCase(private val repository: HvacRepository) {
+class HvacUserAdjustFanSpeedUseCase(
+    private val repository: HvacRepository,
+    private val storeFanSpeedToLocalUseCase: HvacStoreFanSpeedToLocalUseCase,
+    private val storeIsPowerOnToLocalUseCase: HvacStoreIsPowerOnToLocalUseCase
+) {
     /**
      * Adjusts the fan speed by a given delta.
      * Special handling:
@@ -26,13 +32,15 @@ class HvacUserAdjustFanSpeedUseCase(private val repository: HvacRepository) {
         // Special case: decreasing fan speed from MIN turns off the whole system.
         if (currentState.fanSpeed == Constants.FAN_SPEED_MIN && delta < 0) {
             val newState = currentState.copy(isPowerOn = false)
-            repository.updateHvacState(newState)
+            repository.updatePlatformHvacState(newState)
+            storeIsPowerOnToLocalUseCase(false)
             return newState
         }
         
         val newFanSpeed = (currentState.fanSpeed + delta).coerceIn(Constants.FAN_SPEED_MIN, Constants.FAN_SPEED_MAX)
         val newState = currentState.copy(fanSpeed = newFanSpeed)
-        repository.updateHvacState(newState)
+        repository.updatePlatformHvacState(newState)
+        storeFanSpeedToLocalUseCase(newFanSpeed)
         return newState
     }
 }

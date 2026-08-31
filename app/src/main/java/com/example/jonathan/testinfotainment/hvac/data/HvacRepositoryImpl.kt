@@ -10,16 +10,36 @@ import kotlinx.coroutines.flow.Flow
  */
 class HvacRepositoryImpl(
     private val localDataSource: HvacLocalDataSource,
-    private val platformDataSource: HvacPlatformDataSource
+    private val platformDataSource: HvacPlatformDataSource,
 ) : HvacRepository {
     
     // UI observes the platform state as the single source of truth for the vehicle
     override fun getHvacState(): Flow<HvacEntity> = platformDataSource.hvacState
 
-    override suspend fun updateHvacState(hvacEntity: HvacEntity) {
+    override suspend fun updatePlatformHvacState(hvacEntity: HvacEntity) {
         // Send updates to the platform (VHAL)
         platformDataSource.updateState(hvacEntity)
-        // Persist to local storage if needed (e.g. for resume on next boot)
+    }
+
+    override fun getLocalHvacState(): Flow<HvacEntity> = localDataSource.hvacState
+
+    override suspend fun updateLocalHvacState(hvacEntity: HvacEntity) {
         localDataSource.updateState(hvacEntity)
+    }
+
+    override suspend fun storeLocalIsPowerOn(isPowerOn: Boolean) {
+        localDataSource.updateIsPowerOn(isPowerOn)
+    }
+
+    override suspend fun storeLocalTemperature(temperature: Int) {
+        localDataSource.updateTemperature(temperature)
+    }
+
+    override suspend fun storeLocalFanSpeed(fanSpeed: Int) {
+        localDataSource.updateFanSpeed(fanSpeed)
+    }
+
+    override suspend fun storeLocalIsFrontDefrosterOn(isOn: Boolean) {
+        localDataSource.updateIsFrontDefrosterOn(isOn)
     }
 }

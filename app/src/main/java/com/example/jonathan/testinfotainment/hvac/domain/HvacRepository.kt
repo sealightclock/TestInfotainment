@@ -13,9 +13,26 @@ interface HvacRepository {
     fun getHvacState(): Flow<HvacEntity>
 
     /**
-     * Updates the HVAC state across both platform and local storage.
+     * Updates the HVAC state on the vehicle platform.
      *
      * @param hvacEntity The new state to apply.
      */
-    suspend fun updateHvacState(hvacEntity: HvacEntity)
+    suspend fun updatePlatformHvacState(hvacEntity: HvacEntity)
+
+    /**
+     * Returns a flow of the current HVAC state stored locally.
+     */
+    fun getLocalHvacState(): Flow<HvacEntity>
+
+    /**
+     * Updates only the local HVAC state.
+     *
+     * @param hvacEntity The state to persist locally.
+     */
+    suspend fun updateLocalHvacState(hvacEntity: HvacEntity)
+
+    suspend fun storeLocalIsPowerOn(isPowerOn: Boolean)
+    suspend fun storeLocalTemperature(temperature: Int)
+    suspend fun storeLocalFanSpeed(fanSpeed: Int)
+    suspend fun storeLocalIsFrontDefrosterOn(isOn: Boolean)
 }

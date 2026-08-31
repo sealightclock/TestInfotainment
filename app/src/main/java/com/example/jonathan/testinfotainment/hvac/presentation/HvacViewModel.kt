@@ -6,11 +6,7 @@ import com.example.jonathan.testinfotainment.common.Constants.DELAY_DATA_PLATFOR
 import com.example.jonathan.testinfotainment.common.Constants.DELAY_VIEW_DISABLED_TO_ENABLED
 import com.example.jonathan.testinfotainment.common.Constants.DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM
 import com.example.jonathan.testinfotainment.hvac.domain.HvacEntity
-import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacGetStateUseCase
-import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacUserAdjustFanSpeedUseCase
-import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacUserAdjustTemperatureUseCase
-import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacUserToggleFrontDefrosterUseCase
-import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacUserTogglePowerUseCase
+import com.example.jonathan.testinfotainment.hvac.domain.usecase.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +25,14 @@ class HvacViewModel(
     private val hvacUserAdjustTemperatureUseCase: HvacUserAdjustTemperatureUseCase,
     private val hvacUserAdjustFanSpeedUseCase: HvacUserAdjustFanSpeedUseCase,
     private val hvacUserToggleFrontDefrosterUseCase: HvacUserToggleFrontDefrosterUseCase,
+    private val getIsPowerOnFromLocalUseCase: HvacGetIsPowerOnFromLocalUseCase,
+    private val storeIsPowerOnToLocalUseCase: HvacStoreIsPowerOnToLocalUseCase,
+    private val getTemperatureFromLocalUseCase: HvacGetTemperatureFromLocalUseCase,
+    private val storeTemperatureToLocalUseCase: HvacStoreTemperatureToLocalUseCase,
+    private val getFanSpeedFromLocalUseCase: HvacGetFanSpeedFromLocalUseCase,
+    private val storeFanSpeedToLocalUseCase: HvacStoreFanSpeedToLocalUseCase,
+    private val getIsFrontDefrosterOnFromLocalUseCase: HvacGetIsFrontDefrosterOnFromLocalUseCase,
+    private val storeIsFrontDefrosterOnToLocalUseCase: HvacStoreIsFrontDefrosterOnToLocalUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HvacState())
@@ -158,7 +162,7 @@ class HvacViewModel(
 
                 is HvacIntent.PlatformRefreshPowerIntent -> {
                     val currentTime = System.currentTimeMillis()
-                    if (currentTime - lastPowerUpdateTimestamp >= DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
+                    if ((currentTime - lastPowerUpdateTimestamp) >= DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
                         updateUi(currentEntity.copy(isPowerOn = intent.isPowerOn))
                     }
                     null
@@ -166,7 +170,7 @@ class HvacViewModel(
 
                 is HvacIntent.PlatformRefreshTemperatureIntent -> {
                     val currentTime = System.currentTimeMillis()
-                    if (currentTime - lastTemperatureUpdateTimestamp >= DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
+                    if ((currentTime - lastTemperatureUpdateTimestamp) >= DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
                         updateUi(currentEntity.copy(temperature = intent.temperature))
                     }
                     null
@@ -174,7 +178,7 @@ class HvacViewModel(
 
                 is HvacIntent.PlatformRefreshFanSpeedIntent -> {
                     val currentTime = System.currentTimeMillis()
-                    if (currentTime - lastFanSpeedUpdateTimestamp >= DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
+                    if ((currentTime - lastFanSpeedUpdateTimestamp) >= DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
                         updateUi(currentEntity.copy(fanSpeed = intent.fanSpeed))
                     }
                     null
@@ -182,7 +186,7 @@ class HvacViewModel(
 
                 is HvacIntent.PlatformRefreshFrontDefrosterIntent -> {
                     val currentTime = System.currentTimeMillis()
-                    if (currentTime - lastFrontDefrosterUpdateTimestamp >= DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
+                    if ((currentTime - lastFrontDefrosterUpdateTimestamp) >= DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
                         updateUi(currentEntity.copy(isFrontDefrosterOn = intent.isFrontDefrosterOn))
                     }
                     null
