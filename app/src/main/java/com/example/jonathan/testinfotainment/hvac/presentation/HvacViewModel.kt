@@ -47,10 +47,10 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
 
                 // Divide the platform update into granular intents for better efficiency.
                 // This ensures we only process properties that might have changed.
-                onIntent(HvacIntent.RefreshPower(entity.isPowerOn))
-                onIntent(HvacIntent.RefreshTemperature(entity.temperature))
-                onIntent(HvacIntent.RefreshFanSpeed(entity.fanSpeed))
-                onIntent(HvacIntent.RefreshFrontDefroster(entity.isFrontDefrosterOn))
+                onIntent(HvacIntent.PlatformRefreshPowerIntent(entity.isPowerOn))
+                onIntent(HvacIntent.PlatformRefreshTemperatureIntent(entity.temperature))
+                onIntent(HvacIntent.PlatformRefreshFanSpeedIntent(entity.fanSpeed))
+                onIntent(HvacIntent.PlatformRefreshFrontDefrosterIntent(entity.isFrontDefrosterOn))
             }
         }
     }
@@ -70,7 +70,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
             //   casting.
             val nextEntity: HvacEntity? = when (intent) {
                 // User Intent to toggle Power:
-                HvacIntent.TogglePower -> {
+                HvacIntent.UserTogglePowerIntent -> {
                     val entityBeforeChange = currentEntity
                     lastPowerUpdateTimestamp = System.currentTimeMillis()
                     
@@ -87,7 +87,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                 }
 
                 // User Intent to increase Temperature:
-                HvacIntent.IncreaseTemperature -> {
+                HvacIntent.UserIncreaseTemperatureIntent -> {
                     // Temperature cannot be adjusted if front defroster is on (it's maxed).
                     if (!currentEntity.isFrontDefrosterOn) {
                         lastTemperatureUpdateTimestamp = System.currentTimeMillis()
@@ -96,7 +96,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                 }
 
                 // User Intent to decrease Temperature:
-                HvacIntent.DecreaseTemperature -> {
+                HvacIntent.UserDecreaseTemperatureIntent -> {
                     // Temperature cannot be adjusted if front defroster is on (it's maxed).
                     if (!currentEntity.isFrontDefrosterOn) {
                         lastTemperatureUpdateTimestamp = System.currentTimeMillis()
@@ -105,7 +105,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                 }
 
                 // User Intent to increase Fan Speed:
-                HvacIntent.IncreaseFanSpeed -> {
+                HvacIntent.UserIncreaseFanSpeedIntent -> {
                     // Fan speed cannot be adjusted if front defroster is on (it's maxed).
                     if (!currentEntity.isFrontDefrosterOn) {
                         lastFanSpeedUpdateTimestamp = System.currentTimeMillis()
@@ -114,7 +114,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                 }
 
                 // User Intent to decrease Fan Speed:
-                HvacIntent.DecreaseFanSpeed -> {
+                HvacIntent.UserDecreaseFanSpeedIntent -> {
                     // Fan speed cannot be adjusted if front defroster is on (it's maxed).
                     if (!currentEntity.isFrontDefrosterOn) {
                         lastFanSpeedUpdateTimestamp = System.currentTimeMillis()
@@ -123,7 +123,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                 }
 
                 // User Intent to toggle Front Defroster:
-                HvacIntent.ToggleFrontDefroster -> {
+                HvacIntent.UserToggleFrontDefrosterIntent -> {
                     val entityBeforeChange = currentEntity
                     val currentTime = System.currentTimeMillis()
                     
@@ -148,7 +148,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                 // Cooldown logic: Reject Platform values if the user modified them recently (within 2s threshold).
                 // This prevents "jumping" sliders or values when the platform hasn't yet processed the user's change.
 
-                is HvacIntent.RefreshPower -> {
+                is HvacIntent.PlatformRefreshPowerIntent -> {
                     val currentTime = System.currentTimeMillis()
                     if (currentTime - lastPowerUpdateTimestamp >= DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
                         updateUi(currentEntity.copy(isPowerOn = intent.isPowerOn))
@@ -156,7 +156,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                     null
                 }
 
-                is HvacIntent.RefreshTemperature -> {
+                is HvacIntent.PlatformRefreshTemperatureIntent -> {
                     val currentTime = System.currentTimeMillis()
                     if (currentTime - lastTemperatureUpdateTimestamp >= DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
                         updateUi(currentEntity.copy(temperature = intent.temperature))
@@ -164,7 +164,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                     null
                 }
 
-                is HvacIntent.RefreshFanSpeed -> {
+                is HvacIntent.PlatformRefreshFanSpeedIntent -> {
                     val currentTime = System.currentTimeMillis()
                     if (currentTime - lastFanSpeedUpdateTimestamp >= DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
                         updateUi(currentEntity.copy(fanSpeed = intent.fanSpeed))
@@ -172,7 +172,7 @@ class HvacViewModel(private val useCase: HvacUseCase) : ViewModel() {
                     null
                 }
 
-                is HvacIntent.RefreshFrontDefroster -> {
+                is HvacIntent.PlatformRefreshFrontDefrosterIntent -> {
                     val currentTime = System.currentTimeMillis()
                     if (currentTime - lastFrontDefrosterUpdateTimestamp >= DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM) {
                         updateUi(currentEntity.copy(isFrontDefrosterOn = intent.isFrontDefrosterOn))

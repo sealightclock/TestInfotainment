@@ -54,7 +54,7 @@ fun HvacScreen(viewModel: HvacViewModel) {
         HvacControlButton(
             icon = Icons.Default.PowerSettingsNew,
             isSelected = state.isPowerOn,
-            onClick = { viewModel.onIntent(HvacIntent.TogglePower) },
+            onClick = { viewModel.onIntent(HvacIntent.UserTogglePowerIntent) },
             label = if (state.isPowerOn) "ON" else "OFF",
             isPrimaryAction = true,
             enabled = state.isPowerButtonEnabled
@@ -69,8 +69,8 @@ fun HvacScreen(viewModel: HvacViewModel) {
                 else -> "${state.temperature}°F"
             },
             enabled = state.isPowerOn && !state.isFrontDefrosterOn,
-            onIncrease = { viewModel.onIntent(HvacIntent.IncreaseTemperature) },
-            onDecrease = { viewModel.onIntent(HvacIntent.DecreaseTemperature) }
+            onIncrease = { viewModel.onIntent(HvacIntent.UserIncreaseTemperatureIntent) },
+            onDecrease = { viewModel.onIntent(HvacIntent.UserDecreaseTemperatureIntent) }
         )
 
         // Fan Speed Control: Disabled when power is off or front defroster is active.
@@ -78,8 +78,8 @@ fun HvacScreen(viewModel: HvacViewModel) {
             icon = Icons.Default.Air,
             value = state.fanSpeed.toString(),
             enabled = state.isPowerOn && !state.isFrontDefrosterOn,
-            onIncrease = { viewModel.onIntent(HvacIntent.IncreaseFanSpeed) },
-            onDecrease = { viewModel.onIntent(HvacIntent.DecreaseFanSpeed) }
+            onIncrease = { viewModel.onIntent(HvacIntent.UserIncreaseFanSpeedIntent) },
+            onDecrease = { viewModel.onIntent(HvacIntent.UserDecreaseFanSpeedIntent) }
         )
 
         // Front Defroster: Toggles the defroster mode. Forces max temp and fan speed when active.
@@ -87,7 +87,7 @@ fun HvacScreen(viewModel: HvacViewModel) {
             icon = Icons.Default.WindPower,
             isSelected = state.isFrontDefrosterOn,
             enabled = state.isPowerOn && state.isFrontDefrosterButtonEnabled,
-            onClick = { viewModel.onIntent(HvacIntent.ToggleFrontDefroster) },
+            onClick = { viewModel.onIntent(HvacIntent.UserToggleFrontDefrosterIntent) },
             label = "FRONT"
         )
     }
