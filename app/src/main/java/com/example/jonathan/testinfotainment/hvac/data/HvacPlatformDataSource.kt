@@ -8,6 +8,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
@@ -37,6 +38,34 @@ class HvacPlatformDataSource : HvacDataSource {
         scope.launch {
             delay(DELAY_DATA_BACKEND_TO_PLATFORM)
             _hvacState.value = newState
+        }
+    }
+
+    override suspend fun updateIsPowerOn(isPowerOn: Boolean) {
+        scope.launch {
+            delay(DELAY_DATA_BACKEND_TO_PLATFORM)
+            _hvacState.update { it.copy(isPowerOn = isPowerOn) }
+        }
+    }
+
+    override suspend fun updateTemperature(temperature: Int) {
+        scope.launch {
+            delay(DELAY_DATA_BACKEND_TO_PLATFORM)
+            _hvacState.update { it.copy(temperature = temperature) }
+        }
+    }
+
+    override suspend fun updateFanSpeed(fanSpeed: Int) {
+        scope.launch {
+            delay(DELAY_DATA_BACKEND_TO_PLATFORM)
+            _hvacState.update { it.copy(fanSpeed = fanSpeed) }
+        }
+    }
+
+    override suspend fun updateIsFrontDefrosterOn(isOn: Boolean) {
+        scope.launch {
+            delay(DELAY_DATA_BACKEND_TO_PLATFORM)
+            _hvacState.update { it.copy(isFrontDefrosterOn = isOn) }
         }
     }
 }

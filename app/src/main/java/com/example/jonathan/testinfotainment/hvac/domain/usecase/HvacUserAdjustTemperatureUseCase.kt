@@ -25,9 +25,8 @@ class HvacUserAdjustTemperatureUseCase(
     suspend operator fun invoke(currentState: HvacEntity, delta: Int): HvacEntity {
         if (!currentState.isPowerOn) return currentState
         val newTemp = (currentState.temperature + delta).coerceIn(Constants.TEMPERATURE_MIN, Constants.TEMPERATURE_MAX)
-        val newState = currentState.copy(temperature = newTemp)
-        repository.updatePlatformHvacState(newState)
+        repository.updatePlatformTemperature(newTemp)
         storeTemperatureToLocalUseCase(newTemp)
-        return newState
+        return currentState.copy(temperature = newTemp)
     }
 }

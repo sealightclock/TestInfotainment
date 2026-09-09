@@ -22,9 +22,9 @@ class HvacUserToggleFrontDefrosterUseCase(
      */
     suspend operator fun invoke(currentState: HvacEntity): HvacEntity {
         if (!currentState.isPowerOn) return currentState
-        val newState = currentState.copy(isFrontDefrosterOn = !currentState.isFrontDefrosterOn)
-        repository.updatePlatformHvacState(newState)
-        storeIsFrontDefrosterOnToLocalUseCase(newState.isFrontDefrosterOn)
-        return newState
+        val newIsFrontDefrosterOn = !currentState.isFrontDefrosterOn
+        repository.updatePlatformIsFrontDefrosterOn(newIsFrontDefrosterOn)
+        storeIsFrontDefrosterOnToLocalUseCase(newIsFrontDefrosterOn)
+        return currentState.copy(isFrontDefrosterOn = newIsFrontDefrosterOn)
     }
 }

@@ -9,4 +9,9 @@ import kotlinx.coroutines.flow.Flow
 interface HvacDataSource {
     val hvacState: Flow<HvacEntity>
     suspend fun updateState(newState: HvacEntity)
+
+    suspend fun updateIsPowerOn(isPowerOn: Boolean)
+    suspend fun updateTemperature(temperature: Int)
+    suspend fun updateFanSpeed(fanSpeed: Int)
+    suspend fun updateIsFrontDefrosterOn(isOn: Boolean)
 }

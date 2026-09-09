@@ -21,6 +21,22 @@ class HvacRepositoryImpl(
         platformDataSource.updateState(hvacEntity)
     }
 
+    override suspend fun updatePlatformIsPowerOn(isPowerOn: Boolean) {
+        platformDataSource.updateIsPowerOn(isPowerOn)
+    }
+
+    override suspend fun updatePlatformTemperature(temperature: Int) {
+        platformDataSource.updateTemperature(temperature)
+    }
+
+    override suspend fun updatePlatformFanSpeed(fanSpeed: Int) {
+        platformDataSource.updateFanSpeed(fanSpeed)
+    }
+
+    override suspend fun updatePlatformIsFrontDefrosterOn(isOn: Boolean) {
+        platformDataSource.updateIsFrontDefrosterOn(isOn)
+    }
+
     override fun getLocalHvacState(): Flow<HvacEntity> = localDataSource.hvacState
 
     override suspend fun updateLocalHvacState(hvacEntity: HvacEntity) {

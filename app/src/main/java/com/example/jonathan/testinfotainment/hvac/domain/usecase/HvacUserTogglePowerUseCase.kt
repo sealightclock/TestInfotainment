@@ -20,9 +20,9 @@ class HvacUserTogglePowerUseCase(
      * @return The updated HVAC state.
      */
     suspend operator fun invoke(currentState: HvacEntity): HvacEntity {
-        val newState = currentState.copy(isPowerOn = !currentState.isPowerOn)
-        repository.updatePlatformHvacState(newState)
-        storeIsPowerOnToLocalUseCase(newState.isPowerOn)
-        return newState
+        val newIsPowerOn = !currentState.isPowerOn
+        repository.updatePlatformIsPowerOn(newIsPowerOn)
+        storeIsPowerOnToLocalUseCase(newIsPowerOn)
+        return currentState.copy(isPowerOn = newIsPowerOn)
     }
 }

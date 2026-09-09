@@ -31,16 +31,14 @@ class HvacUserAdjustFanSpeedUseCase(
         
         // Special case: decreasing fan speed from MIN turns off the whole system.
         if (currentState.fanSpeed == Constants.FAN_SPEED_MIN && delta < 0) {
-            val newState = currentState.copy(isPowerOn = false)
-            repository.updatePlatformHvacState(newState)
+            repository.updatePlatformIsPowerOn(false)
             storeIsPowerOnToLocalUseCase(false)
-            return newState
+            return currentState.copy(isPowerOn = false)
         }
         
         val newFanSpeed = (currentState.fanSpeed + delta).coerceIn(Constants.FAN_SPEED_MIN, Constants.FAN_SPEED_MAX)
-        val newState = currentState.copy(fanSpeed = newFanSpeed)
-        repository.updatePlatformHvacState(newState)
+        repository.updatePlatformFanSpeed(newFanSpeed)
         storeFanSpeedToLocalUseCase(newFanSpeed)
-        return newState
+        return currentState.copy(fanSpeed = newFanSpeed)
     }
 }
