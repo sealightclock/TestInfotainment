@@ -5,46 +5,21 @@ import com.example.jonathan.testinfotainment.hvac.data.HvacLocalDataSource
 import com.example.jonathan.testinfotainment.hvac.data.HvacPlatformDataSource
 import com.example.jonathan.testinfotainment.hvac.data.HvacRepositoryImpl
 import com.example.jonathan.testinfotainment.hvac.domain.HvacRepository
-import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacGetFanSpeedFromLocalUseCase
-import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacGetIsFrontDefrosterOnFromLocalUseCase
-import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacGetIsPowerOnFromLocalUseCase
-import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacGetTemperatureFromLocalUseCase
-import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacGetStateUseCase
-import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacUserAdjustFanSpeedUseCase
-import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacUserAdjustTemperatureUseCase
-import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacUserToggleFrontDefrosterUseCase
-import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacUserTogglePowerUseCase
-import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacStoreFanSpeedToLocalUseCase
-import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacStoreIsFrontDefrosterOnToLocalUseCase
-import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacStoreIsPowerOnToLocalUseCase
-import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacStoreTemperatureToLocalUseCase
+import com.example.jonathan.testinfotainment.hvac.domain.usecase.*
 
 /**
- * Dependency Container for the application.
- * This is the "Composition Root" where all dependencies are wired together.
- */
-/**
  * Dependency Container interface for the application.
- * Defines the dependencies available throughout the app.
+ * Defines the public dependencies available throughout the app.
  */
 interface AppContainer {
     /**
-     * Use cases for HVAC operations.
+     * Use cases for HVAC operations used by ViewModels.
      */
     val hvacGetStateUseCase: HvacGetStateUseCase
     val hvacUserTogglePowerUseCase: HvacUserTogglePowerUseCase
     val hvacUserAdjustTemperatureUseCase: HvacUserAdjustTemperatureUseCase
     val hvacUserAdjustFanSpeedUseCase: HvacUserAdjustFanSpeedUseCase
     val hvacUserToggleFrontDefrosterUseCase: HvacUserToggleFrontDefrosterUseCase
-
-    val getIsPowerOnFromLocalUseCase: HvacGetIsPowerOnFromLocalUseCase
-    val storeIsPowerOnToLocalUseCase: HvacStoreIsPowerOnToLocalUseCase
-    val getTemperatureFromLocalUseCase: HvacGetTemperatureFromLocalUseCase
-    val storeTemperatureToLocalUseCase: HvacStoreTemperatureToLocalUseCase
-    val getFanSpeedFromLocalUseCase: HvacGetFanSpeedFromLocalUseCase
-    val storeFanSpeedToLocalUseCase: HvacStoreFanSpeedToLocalUseCase
-    val getIsFrontDefrosterOnFromLocalUseCase: HvacGetIsFrontDefrosterOnFromLocalUseCase
-    val storeIsFrontDefrosterOnToLocalUseCase: HvacStoreIsFrontDefrosterOnToLocalUseCase
 }
 
 /**
@@ -76,6 +51,8 @@ class AppContainerImpl(private val context: Context) : AppContainer {
         HvacRepositoryImpl(hvacLocalDataSource, hvacPlatformDataSource)
     }
 
+    // --- Public Use Cases ---
+
     override val hvacGetStateUseCase: HvacGetStateUseCase by lazy {
         HvacGetStateUseCase(hvacRepository)
     }
@@ -100,35 +77,21 @@ class AppContainerImpl(private val context: Context) : AppContainer {
         HvacUserToggleFrontDefrosterUseCase(hvacRepository, storeIsFrontDefrosterOnToLocalUseCase)
     }
 
-    override val getIsPowerOnFromLocalUseCase: HvacGetIsPowerOnFromLocalUseCase by lazy {
-        HvacGetIsPowerOnFromLocalUseCase(hvacRepository)
-    }
+    // --- Internal Persistence Use Cases (Private) ---
 
-    override val storeIsPowerOnToLocalUseCase: HvacStoreIsPowerOnToLocalUseCase by lazy {
+    private val storeIsPowerOnToLocalUseCase: HvacStoreIsPowerOnToLocalUseCase by lazy {
         HvacStoreIsPowerOnToLocalUseCase(hvacRepository)
     }
 
-    override val getTemperatureFromLocalUseCase: HvacGetTemperatureFromLocalUseCase by lazy {
-        HvacGetTemperatureFromLocalUseCase(hvacRepository)
-    }
-
-    override val storeTemperatureToLocalUseCase: HvacStoreTemperatureToLocalUseCase by lazy {
+    private val storeTemperatureToLocalUseCase: HvacStoreTemperatureToLocalUseCase by lazy {
         HvacStoreTemperatureToLocalUseCase(hvacRepository)
     }
 
-    override val getFanSpeedFromLocalUseCase: HvacGetFanSpeedFromLocalUseCase by lazy {
-        HvacGetFanSpeedFromLocalUseCase(hvacRepository)
-    }
-
-    override val storeFanSpeedToLocalUseCase: HvacStoreFanSpeedToLocalUseCase by lazy {
+    private val storeFanSpeedToLocalUseCase: HvacStoreFanSpeedToLocalUseCase by lazy {
         HvacStoreFanSpeedToLocalUseCase(hvacRepository)
     }
 
-    override val getIsFrontDefrosterOnFromLocalUseCase: HvacGetIsFrontDefrosterOnFromLocalUseCase by lazy {
-        HvacGetIsFrontDefrosterOnFromLocalUseCase(hvacRepository)
-    }
-
-    override val storeIsFrontDefrosterOnToLocalUseCase: HvacStoreIsFrontDefrosterOnToLocalUseCase by lazy {
+    private val storeIsFrontDefrosterOnToLocalUseCase: HvacStoreIsFrontDefrosterOnToLocalUseCase by lazy {
         HvacStoreIsFrontDefrosterOnToLocalUseCase(hvacRepository)
     }
 }

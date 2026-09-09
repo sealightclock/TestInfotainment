@@ -1,35 +1,39 @@
 package com.example.jonathan.testinfotainment.hvac.presentation
 
+import com.example.jonathan.testinfotainment.hvac.domain.HvacEntity
+
 /**
- * List of supported Intents (or events)
- *     [1] Use "object" if there is no argument list, for efficiency.
- *     [2] Use "data class" if there is argument list.
+ * List of supported Intents (or events) for the HVAC system.
+ * Handles both user interactions and platform state updates.
  */
 sealed class HvacIntent {
     // User Intents
     // ==========
 
-    // User Intents for Power button:
+    /** User toggled the main power button. */
     object UserTogglePowerIntent : HvacIntent()
 
-    // User Intents for Temperature
+    /** User wants to increase the target temperature. */
     object UserIncreaseTemperatureIntent : HvacIntent()
+    /** User wants to decrease the target temperature. */
     object UserDecreaseTemperatureIntent : HvacIntent()
 
-    // User Intents for Fan Speed:
+    /** User wants to increase the fan speed. */
     object UserIncreaseFanSpeedIntent : HvacIntent()
+    /** User wants to decrease the fan speed. */
     object UserDecreaseFanSpeedIntent : HvacIntent()
 
-    // User Intents for Front Defroster:
+    /** User toggled the front defroster. */
     object UserToggleFrontDefrosterIntent : HvacIntent()
 
     // Platform Intents
     // ==========
 
-    data class PlatformRefreshPowerIntent(val isPowerOn: Boolean) : HvacIntent()
-    data class PlatformRefreshTemperatureIntent(val temperature: Int) : HvacIntent()
-    data class PlatformRefreshFanSpeedIntent(val fanSpeed: Int) : HvacIntent()
-    data class PlatformRefreshFrontDefrosterIntent(val isFrontDefrosterOn: Boolean) : HvacIntent()
-
-    // Timer Intents are implemented as delays. Refer to file "Constants.kt" for more details.
+    /**
+     * Intent to refresh the entire HVAC state from the platform.
+     * Consolidates individual property updates to reduce intent queue overhead.
+     *
+     * @property entity The new HVAC state from the platform.
+     */
+    data class PlatformRefreshStateIntent(val entity: HvacEntity) : HvacIntent()
 }

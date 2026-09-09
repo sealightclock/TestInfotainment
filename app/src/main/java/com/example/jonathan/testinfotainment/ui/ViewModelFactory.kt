@@ -27,14 +27,6 @@ class ViewModelFactory(private val appContainer: AppContainer) : ViewModelProvid
                     hvacUserAdjustTemperatureUseCase = appContainer.hvacUserAdjustTemperatureUseCase,
                     hvacUserAdjustFanSpeedUseCase = appContainer.hvacUserAdjustFanSpeedUseCase,
                     hvacUserToggleFrontDefrosterUseCase = appContainer.hvacUserToggleFrontDefrosterUseCase,
-                    getIsPowerOnFromLocalUseCase = appContainer.getIsPowerOnFromLocalUseCase,
-                    storeIsPowerOnToLocalUseCase = appContainer.storeIsPowerOnToLocalUseCase,
-                    getTemperatureFromLocalUseCase = appContainer.getTemperatureFromLocalUseCase,
-                    storeTemperatureToLocalUseCase = appContainer.storeTemperatureToLocalUseCase,
-                    getFanSpeedFromLocalUseCase = appContainer.getFanSpeedFromLocalUseCase,
-                    storeFanSpeedToLocalUseCase = appContainer.storeFanSpeedToLocalUseCase,
-                    getIsFrontDefrosterOnFromLocalUseCase = appContainer.getIsFrontDefrosterOnFromLocalUseCase,
-                    storeIsFrontDefrosterOnToLocalUseCase = appContainer.storeIsFrontDefrosterOnToLocalUseCase,
                 ) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
