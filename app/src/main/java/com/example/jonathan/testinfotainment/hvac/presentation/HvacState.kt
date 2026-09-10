@@ -1,6 +1,6 @@
 package com.example.jonathan.testinfotainment.hvac.presentation
 
-import com.example.jonathan.testinfotainment.common.Constants
+import com.example.jonathan.testinfotainment.hvac.common.Constants
 
 /**
  * Represents the UI state for the HVAC (Heating, Ventilation, and Air Conditioning) system.

@@ -1,6 +1,6 @@
 package com.example.jonathan.testinfotainment.hvac.domain.usecase
 
-import com.example.jonathan.testinfotainment.common.Constants
+import com.example.jonathan.testinfotainment.hvac.common.Constants
 import com.example.jonathan.testinfotainment.hvac.domain.HvacEntity
 import com.example.jonathan.testinfotainment.hvac.domain.HvacRepository
 

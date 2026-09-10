@@ -2,21 +2,25 @@ package com.example.jonathan.testinfotainment.hvac.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.jonathan.testinfotainment.common.Constants
+import com.example.jonathan.testinfotainment.common.Constants.DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM
 import com.example.jonathan.testinfotainment.common.Constants.DELAY_DATA_PLATFORM_TO_VIEWMODEL_TO_INTENT
 import com.example.jonathan.testinfotainment.common.Constants.DELAY_VIEW_DISABLED_TO_ENABLED
-import com.example.jonathan.testinfotainment.common.Constants.DELAY_DATA_CONCURRENCY_UI_TO_PLATFORM
+import com.example.jonathan.testinfotainment.hvac.common.Constants
 import com.example.jonathan.testinfotainment.hvac.domain.HvacEntity
-import com.example.jonathan.testinfotainment.hvac.domain.usecase.*
+import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacGetStateUseCase
+import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacUserAdjustFanSpeedUseCase
+import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacUserAdjustTemperatureUseCase
+import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacUserToggleFrontDefrosterUseCase
+import com.example.jonathan.testinfotainment.hvac.domain.usecase.HvacUserTogglePowerUseCase
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.receiveAsFlow
 
 /**
  * ViewModel for the HVAC screen, managing state and user interactions.

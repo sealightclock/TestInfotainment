@@ -1,6 +1,6 @@
 package com.example.jonathan.testinfotainment.hvac.domain
 
-import com.example.jonathan.testinfotainment.common.Constants
+import com.example.jonathan.testinfotainment.hvac.common.Constants
 
 /**
  * Domain entity representing the state of the vehicle's HVAC system.
