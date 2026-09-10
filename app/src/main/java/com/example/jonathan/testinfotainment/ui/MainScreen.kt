@@ -23,13 +23,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.jonathan.testinfotainment.TestInfotainmentApp
-import com.example.jonathan.testinfotainment.common.AppContainer
 import com.example.jonathan.testinfotainment.hvac.presentation.HvacScreen
 import com.example.jonathan.testinfotainment.hvac.presentation.HvacViewModel
+import com.example.jonathan.testinfotainment.hvac.presentation.HvacViewModelFactory
 
 private const val TAG = "TIF: MainScreen"
 
@@ -47,17 +47,13 @@ enum class Screen(val label: String, val icon: ImageVector) {
 
 /**
  * The root Composable for the application's UI, featuring a side navigation bar and a content area.
- *
- * @param appContainer The dependency injection container for providing view models.
  */
 @Composable
-fun MainScreen(
-    appContainer: AppContainer = (androidx.compose.ui.platform.LocalContext.current.applicationContext as TestInfotainmentApp).container
-) {
+fun MainScreen() {
     Log.i(TAG, "MainScreen")
 
     val hvacViewModel: HvacViewModel = viewModel(
-        factory = ViewModelFactory(appContainer)
+        factory = HvacViewModelFactory(LocalContext.current.applicationContext)
     )
 
     var currentScreen by remember { mutableStateOf(Screen.Home) }
@@ -112,7 +108,6 @@ fun ScreenContent(screen: Screen, hvacViewModel: HvacViewModel) {
 @Preview(showBackground = true, widthDp = 800, heightDp = 480)
 @Composable
 fun MainScreenPreview() {
-    // In a real app, you would provide a MockAppContainer here for the preview
-    // For now, this might still fail if the context isn't right, but it's better structured.
-    // Text("Main Screen Preview")
+    // In a real app, you would provide a mock factory or mock dependencies here for the preview.
+    // For now, this is a placeholder.
 }
