@@ -5,13 +5,11 @@ plugins {
 
 android {
     namespace = "com.example.jonathan.testinfotainment"
-    compileSdk {
-        version = release(37)
-    }
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.example.jonathan.testinfotainment"
-        minSdk = 37
+        minSdk = 27
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"
