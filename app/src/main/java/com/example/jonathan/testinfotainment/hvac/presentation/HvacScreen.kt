@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -29,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.jonathan.testinfotainment.hvac.common.Constants
@@ -42,54 +44,80 @@ import com.example.jonathan.testinfotainment.hvac.common.Constants
 @Composable
 fun HvacScreen(viewModel: HvacViewModel) {
     val state by viewModel.state.collectAsState()
+    HvacScreenContent(
+        state = state,
+        onIntent = viewModel::onIntent,
+    )
+}
 
-    Row(
+/**
+ * Stateless content composable for HVAC screen, enabling previews and flexible layout.
+ *
+ * @param state The current state of the HVAC system.
+ * @param onIntent Callback to send user intents.
+ */
+@Composable
+fun HvacScreenContent(
+    state: HvacState,
+    onIntent: (HvacIntent) -> Unit,
+) {
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(8.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically,
+            .padding(4.dp),
+        verticalArrangement = Arrangement.SpaceEvenly,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // Power Button: Toggles the entire HVAC system on or off.
-        HvacControlButton(
-            icon = Icons.Default.PowerSettingsNew,
-            isSelected = state.isPowerOn,
-            onClick = { viewModel.onIntent(HvacIntent.UserTogglePowerIntent) },
-            label = if (state.isPowerOn) "ON" else "OFF",
-            isPrimaryAction = true,
-            enabled = state.isPowerButtonEnabled,
-        )
+        // Row 1: Mode toggle buttons (Power and Front Defroster)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            HvacControlButton(
+                icon = Icons.Default.PowerSettingsNew,
+                isSelected = state.isPowerOn,
+                onClick = { onIntent(HvacIntent.UserTogglePowerIntent) },
+                label = if (state.isPowerOn) "ON" else "OFF",
+                isPrimaryAction = true,
+                enabled = state.isPowerButtonEnabled,
+            )
 
-        // Temperature Control: Disabled when power is off or front defroster is active.
-        HvacValueControl(
-            icon = Icons.Default.DeviceThermostat,
-            value = when (state.temperature) {
-                Constants.TEMPERATURE_MIN -> "LO"
-                Constants.TEMPERATURE_MAX -> "HI"
-                else -> "${state.temperature}°F"
-            },
-            enabled = state.isPowerOn && !state.isFrontDefrosterOn,
-            onIncrease = { viewModel.onIntent(HvacIntent.UserIncreaseTemperatureIntent) },
-            onDecrease = { viewModel.onIntent(HvacIntent.UserDecreaseTemperatureIntent) },
-        )
+            HvacControlButton(
+                icon = Icons.Default.WindPower,
+                isSelected = state.isFrontDefrosterOn,
+                enabled = state.isPowerOn && state.isFrontDefrosterButtonEnabled,
+                onClick = { onIntent(HvacIntent.UserToggleFrontDefrosterIntent) },
+                label = "FRONT",
+            )
+        }
 
-        // Fan Speed Control: Disabled when power is off or front defroster is active.
-        HvacValueControl(
-            icon = Icons.Default.Air,
-            value = state.fanSpeed.toString(),
-            enabled = state.isPowerOn && !state.isFrontDefrosterOn,
-            onIncrease = { viewModel.onIntent(HvacIntent.UserIncreaseFanSpeedIntent) },
-            onDecrease = { viewModel.onIntent(HvacIntent.UserDecreaseFanSpeedIntent) },
-        )
+        // Row 2: Value adjustment controls (Temperature and Fan Speed)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            HvacValueControl(
+                icon = Icons.Default.DeviceThermostat,
+                value = when (state.temperature) {
+                    Constants.TEMPERATURE_MIN -> "LO"
+                    Constants.TEMPERATURE_MAX -> "HI"
+                    else -> "${state.temperature}°F"
+                },
+                enabled = state.isPowerOn && !state.isFrontDefrosterOn,
+                onIncrease = { onIntent(HvacIntent.UserIncreaseTemperatureIntent) },
+                onDecrease = { onIntent(HvacIntent.UserDecreaseTemperatureIntent) },
+            )
 
-        // Front Defroster: Toggles the defroster mode. Forces max temp and fan speed when active.
-        HvacControlButton(
-            icon = Icons.Default.WindPower,
-            isSelected = state.isFrontDefrosterOn,
-            enabled = state.isPowerOn && state.isFrontDefrosterButtonEnabled,
-            onClick = { viewModel.onIntent(HvacIntent.UserToggleFrontDefrosterIntent) },
-            label = "FRONT",
-        )
+            HvacValueControl(
+                icon = Icons.Default.Air,
+                value = state.fanSpeed.toString(),
+                enabled = state.isPowerOn && !state.isFrontDefrosterOn,
+                onIncrease = { onIntent(HvacIntent.UserIncreaseFanSpeedIntent) },
+                onDecrease = { onIntent(HvacIntent.UserDecreaseFanSpeedIntent) },
+            )
+        }
     }
 }
 
@@ -125,11 +153,11 @@ fun HvacControlButton(
                 MaterialTheme.colorScheme.onSurfaceVariant
             },
         ),
-        modifier = Modifier.size(width = 120.dp, height = 80.dp),
+        modifier = Modifier.size(width = 100.dp, height = 52.dp),
         shape = MaterialTheme.shapes.medium,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(imageVector = icon, contentDescription = label)
+            Icon(imageVector = icon, contentDescription = label, modifier = Modifier.size(20.dp))
             Text(text = label, style = MaterialTheme.typography.labelSmall)
         }
     }
@@ -157,23 +185,32 @@ fun HvacValueControl(
             imageVector = icon,
             contentDescription = null,
             tint = if (enabled) MaterialTheme.colorScheme.primary else Color.Gray,
-            modifier = Modifier.size(32.dp),
+            modifier = Modifier.size(24.dp),
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(2.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onDecrease, enabled = enabled) {
+            IconButton(onClick = onDecrease, enabled = enabled, modifier = Modifier.size(32.dp)) {
                 Icon(imageVector = Icons.Default.Remove, contentDescription = "Decrease")
             }
             Text(
                 text = value,
-                fontSize = 24.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = if (enabled) MaterialTheme.colorScheme.onSurface else Color.Gray,
-                modifier = Modifier.padding(horizontal = 8.dp),
+                modifier = Modifier.padding(horizontal = 4.dp),
             )
-            IconButton(onClick = onIncrease, enabled = enabled) {
+            IconButton(onClick = onIncrease, enabled = enabled, modifier = Modifier.size(32.dp)) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Increase")
             }
         }
     }
+}
+
+@Preview(showBackground = true, widthDp = 400, heightDp = 150)
+@Composable
+fun HvacScreenContentPreview() {
+    HvacScreenContent(
+        state = HvacState(),
+        onIntent = {},
+    )
 }
