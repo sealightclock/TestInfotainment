@@ -43,12 +43,12 @@ import com.example.jonathan.testinfotainment.hvac.common.Constants
 fun HvacScreen(viewModel: HvacViewModel) {
     val state by viewModel.state.collectAsState()
 
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly
+            .padding(8.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         // Power Button: Toggles the entire HVAC system on or off.
         HvacControlButton(
@@ -57,7 +57,7 @@ fun HvacScreen(viewModel: HvacViewModel) {
             onClick = { viewModel.onIntent(HvacIntent.UserTogglePowerIntent) },
             label = if (state.isPowerOn) "ON" else "OFF",
             isPrimaryAction = true,
-            enabled = state.isPowerButtonEnabled
+            enabled = state.isPowerButtonEnabled,
         )
 
         // Temperature Control: Disabled when power is off or front defroster is active.
@@ -70,7 +70,7 @@ fun HvacScreen(viewModel: HvacViewModel) {
             },
             enabled = state.isPowerOn && !state.isFrontDefrosterOn,
             onIncrease = { viewModel.onIntent(HvacIntent.UserIncreaseTemperatureIntent) },
-            onDecrease = { viewModel.onIntent(HvacIntent.UserDecreaseTemperatureIntent) }
+            onDecrease = { viewModel.onIntent(HvacIntent.UserDecreaseTemperatureIntent) },
         )
 
         // Fan Speed Control: Disabled when power is off or front defroster is active.
@@ -79,7 +79,7 @@ fun HvacScreen(viewModel: HvacViewModel) {
             value = state.fanSpeed.toString(),
             enabled = state.isPowerOn && !state.isFrontDefrosterOn,
             onIncrease = { viewModel.onIntent(HvacIntent.UserIncreaseFanSpeedIntent) },
-            onDecrease = { viewModel.onIntent(HvacIntent.UserDecreaseFanSpeedIntent) }
+            onDecrease = { viewModel.onIntent(HvacIntent.UserDecreaseFanSpeedIntent) },
         )
 
         // Front Defroster: Toggles the defroster mode. Forces max temp and fan speed when active.
@@ -88,7 +88,7 @@ fun HvacScreen(viewModel: HvacViewModel) {
             isSelected = state.isFrontDefrosterOn,
             enabled = state.isPowerOn && state.isFrontDefrosterButtonEnabled,
             onClick = { viewModel.onIntent(HvacIntent.UserToggleFrontDefrosterIntent) },
-            label = "FRONT"
+            label = "FRONT",
         )
     }
 }
@@ -110,7 +110,7 @@ fun HvacControlButton(
     onClick: () -> Unit,
     label: String,
     enabled: Boolean = true,
-    isPrimaryAction: Boolean = false
+    isPrimaryAction: Boolean = false,
 ) {
     Button(
         onClick = onClick,
@@ -123,10 +123,10 @@ fun HvacControlButton(
                 MaterialTheme.colorScheme.primary
             } else {
                 MaterialTheme.colorScheme.onSurfaceVariant
-            }
+            },
         ),
         modifier = Modifier.size(width = 120.dp, height = 80.dp),
-        shape = MaterialTheme.shapes.medium
+        shape = MaterialTheme.shapes.medium,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(imageVector = icon, contentDescription = label)
@@ -150,26 +150,26 @@ fun HvacValueControl(
     value: String,
     enabled: Boolean,
     onIncrease: () -> Unit,
-    onDecrease: () -> Unit
+    onDecrease: () -> Unit,
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Icon(
             imageVector = icon,
             contentDescription = null,
             tint = if (enabled) MaterialTheme.colorScheme.primary else Color.Gray,
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier.size(32.dp),
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onDecrease, enabled = enabled) {
                 Icon(imageVector = Icons.Default.Remove, contentDescription = "Decrease")
             }
             Text(
                 text = value,
-                fontSize = 32.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = if (enabled) MaterialTheme.colorScheme.onSurface else Color.Gray,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 8.dp),
             )
             IconButton(onClick = onIncrease, enabled = enabled) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Increase")
