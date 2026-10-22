@@ -34,6 +34,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.jonathan.testinfotainment.cluster.presentation.ClusterScreen
+import com.example.jonathan.testinfotainment.cluster.presentation.ClusterViewModel
+import com.example.jonathan.testinfotainment.cluster.presentation.ClusterViewModelFactory
 import com.example.jonathan.testinfotainment.hvac.presentation.HvacScreen
 import com.example.jonathan.testinfotainment.hvac.presentation.HvacViewModel
 import com.example.jonathan.testinfotainment.hvac.presentation.HvacViewModelFactory
@@ -65,6 +68,9 @@ fun MainScreen() {
     val hvacViewModel: HvacViewModel = viewModel(
         factory = HvacViewModelFactory(LocalContext.current.applicationContext),
     )
+    val clusterViewModel: ClusterViewModel = viewModel(
+        factory = ClusterViewModelFactory(),
+    )
 
     var currentScreen by remember { mutableStateOf(Screen.Home) }
 
@@ -90,7 +96,7 @@ fun MainScreen() {
                 .fillMaxWidth()
                 .weight(0.4f),
         ) {
-            ClusterSection()
+            ClusterSection(viewModel = clusterViewModel)
         }
 
         HorizontalDivider()
@@ -155,33 +161,13 @@ fun InfotainmentSection(
 
 /**
  * Displays the Cluster section occupying the middle 40% of the screen height.
- * Reserved for displaying safety-critical data of an EV car.
+ * Displays device system settings and GNSS location properties via [ClusterScreen].
+ *
+ * @param viewModel The [ClusterViewModel] managing cluster state.
  */
 @Composable
-fun ClusterSection() {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-    ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "Cluster Section",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Reserved for safety-critical EV car data",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-    }
+fun ClusterSection(viewModel: ClusterViewModel) {
+    ClusterScreen(viewModel = viewModel)
 }
 
 /**
